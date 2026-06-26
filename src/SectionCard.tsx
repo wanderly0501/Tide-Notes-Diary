@@ -196,10 +196,9 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
             <Text style={s.actionIcon}>✎</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onTogglePin(section.id, !section.isPinned)} style={s.actionBtn}>
-            <View style={s.pinIcon}>
-              <View style={[s.pinHead, section.isPinned && s.pinHeadOn]} />
-              <View style={[s.pinShaft, section.isPinned && s.pinShaftOn]} />
-            </View>
+            <Text style={[s.pinArrow, section.isPinned && s.pinArrowOn]}>
+              {section.isPinned ? '↓' : '↑'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={confirmDelete} style={s.actionBtn}>
             <Text style={s.actionIcon}>✕</Text>
@@ -334,11 +333,8 @@ const s = StyleSheet.create({
   actionBtn:    { paddingVertical: 5, paddingLeft: 6, paddingRight: 0 },
   actionIcon:   { fontSize: 14, color: '#a0a8b8' },
   pinnedEmoji:  { fontSize: 13 },
-  pinIcon:      { alignItems: 'center', gap: 1 },
-  pinHead:      { width: 9, height: 9, borderRadius: 5, borderWidth: 1.5, borderColor: '#a0a8b8', backgroundColor: 'transparent' },
-  pinHeadOn:    { backgroundColor: '#4a5a7a', borderColor: '#4a5a7a' },
-  pinShaft:     { width: 1.5, height: 5, backgroundColor: '#a0a8b8', borderRadius: 1 },
-  pinShaftOn:   { backgroundColor: '#4a5a7a' },
+  pinArrow:     { fontSize: 15, color: '#a0a8b8', fontWeight: '300' as any },
+  pinArrowOn:   { color: '#4a5a7a', fontWeight: '700' as any },
   foldPreview:  { fontSize: 13.5, color: C.textMuted, marginTop: 6, marginBottom: 2 },
   foldBtn:      { alignSelf: 'flex-end', marginTop: 1, paddingBottom: 2, paddingLeft: 4, paddingRight: 0 },
   bodyTxt:      { fontSize: 14.5, lineHeight: 23, color: C.textBody, marginBottom: 8, outlineWidth: 0 } as any,
