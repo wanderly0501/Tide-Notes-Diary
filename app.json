@@ -23,7 +23,8 @@
     "scheme": "tide",
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "favicon": "./logo/2.png"
     },
     "plugins": [
       [
