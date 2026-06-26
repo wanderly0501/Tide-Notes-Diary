@@ -47,8 +47,22 @@ export function StreamScreen({
     }
   }, [newSectionOpen]);
 
-  const pinned   = useMemo(() => filteredSections.filter(s => s.isPinned),  [filteredSections]);
-  const unpinned = useMemo(() => filteredSections.filter(s => !s.isPinned), [filteredSections]);
+  const tomorrowStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+
+  const upcomingReminders = useMemo(() =>
+    filteredSections.filter(s => s.isReminder && s.reminderDate === tomorrowStr && !s.isPinned),
+    [filteredSections, tomorrowStr]
+  );
+
+  const pinned   = useMemo(() => filteredSections.filter(s => s.isPinned), [filteredSections]);
+  const unpinned = useMemo(() =>
+    filteredSections.filter(s => !s.isPinned && !(s.isReminder && s.reminderDate === tomorrowStr)),
+    [filteredSections, tomorrowStr]
+  );
   const groups   = useMemo(() => groupByDate(unpinned), [unpinned]);
 
   const handleDatePress = (date: string) => {
@@ -82,10 +96,31 @@ export function StreamScreen({
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.primary} />
         ) : undefined}
       >
+        {/* Reminder sections due tomorrow */}
+        {upcomingReminders.length > 0 && (
+          <View>
+            <View style={st.reminderHeader}>
+              <Text style={st.reminderIcon}>⏰</Text>
+              <Text style={st.reminderLabel}>Due Tomorrow</Text>
+            </View>
+            {upcomingReminders.map(section => (
+              <SectionCard
+                key={section.id}
+                section={section}
+                onEdit={openEdit}
+                onDelete={removeSection}
+                onTogglePin={togglePin}
+                onUpdate={editSection}
+                onTagsChange={updateSectionTags}
+              />
+            ))}
+          </View>
+        )}
+
         {/* Pinned sections */}
         {pinned.length > 0 && (
           <View>
-{pinned.map(section => (
+            {pinned.map(section => (
               <SectionCard
                 key={section.id}
                 section={section}
@@ -154,8 +189,11 @@ const st = StyleSheet.create({
   container:   { flex: 1, flexDirection: 'row' },
   scroll:      { flex: 1, backgroundColor: C.bg },
   content:     { maxWidth: 760, alignSelf: 'center', width: '100%', paddingHorizontal: Platform.OS === 'web' ? 40 : 16, paddingTop: Platform.OS === 'web' ? 26 : 14, paddingBottom: Platform.OS === 'web' ? 80 : 40 },
-  pinnedHeader:{ marginTop: 4, marginBottom: 10, marginHorizontal: 2 },
-  pinnedLabel: { color: '#b03030' },
+  pinnedHeader:  { marginTop: 4, marginBottom: 10, marginHorizontal: 2 },
+  pinnedLabel:   { color: '#b03030' },
+  reminderHeader:{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, marginBottom: 10, marginHorizontal: 2 },
+  reminderIcon:  { fontSize: 13 },
+  reminderLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 1, color: '#c07000', textTransform: 'uppercase' as const },
   divider:     { flexDirection: 'row', alignItems: 'center', gap: 13, marginTop: 24, marginBottom: 14, marginHorizontal: 2 },
   dividerLabel:{ fontSize: 11, fontWeight: '700', letterSpacing: 1, color: '#6f7588', textTransform: 'uppercase' as const },
   dividerLabelToday: { color: C.todayText },
