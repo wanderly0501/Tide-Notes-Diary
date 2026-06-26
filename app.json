@@ -18,6 +18,7 @@
       "icon": "./logo/2.png"
     },
     "android": {
+      "package": "com.tide.notesdiary",
       "adaptiveIcon": {
         "foregroundImage": "./logo/2.png",
         "backgroundColor": "#edf0f6"
