@@ -22,7 +22,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./logo/2.png",
         "backgroundColor": "#edf0f6"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "scheme": "tide",
     "web": {
@@ -42,6 +45,11 @@
       ],
       "expo-asset",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b2fdf8bb-6568-4826-aa47-250199fb19ee"
+      }
+    }
   }
 }
