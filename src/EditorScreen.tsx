@@ -709,7 +709,7 @@ const s = StyleSheet.create({
   fmtActive:    { color: C.primary },
   fmtDiv:       { width: 1, height: 18, backgroundColor: C.border, marginHorizontal: 2 },
   body:              { flex: 1, flexDirection: 'row' },
-  outline:           { width: 240, flexShrink: 0, backgroundColor: C.sidebarBg, borderRightWidth: 1, borderRightColor: C.border, padding: S.md },
+  outline:           { width: 260, flexShrink: 0, backgroundColor: C.sidebarBg, borderRightWidth: 1, borderRightColor: C.border, padding: S.md },
   outlineClosed:     { width: 60, flexShrink: 0, backgroundColor: C.sidebarBg, borderRightWidth: 1, borderRightColor: C.border, alignItems: 'center', paddingTop: 12 },
   outlineToggleMob:  { position: 'absolute', right: 12, top: 12, zIndex: 10, width: 32, height: 32, borderRadius: R.md, backgroundColor: C.sidebarBg, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' },
   outlineMobOverlay: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 190, zIndex: 20, backgroundColor: C.sidebarBg, borderLeftWidth: 1, borderLeftColor: C.border, padding: S.md },

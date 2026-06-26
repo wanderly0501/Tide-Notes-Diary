@@ -59,7 +59,7 @@ function DocsSidebar({ onClose }: { onClose?: () => void }) {
 
 const sb = StyleSheet.create({
   sidebar: {
-    width: 240, flexShrink: 0, backgroundColor: C.tagsSidebarBg,
+    width: 260, flexShrink: 0, backgroundColor: C.tagsSidebarBg,
     borderRightWidth: 1, borderRightColor: C.border,
     flexDirection: 'column',
   },
