@@ -59,7 +59,7 @@ function DocsSidebar({ onClose }: { onClose?: () => void }) {
 
 const sb = StyleSheet.create({
   sidebar: {
-    width: 160, flexShrink: 0, backgroundColor: C.tagsSidebarBg,
+    width: 240, flexShrink: 0, backgroundColor: C.tagsSidebarBg,
     borderRightWidth: 1, borderRightColor: C.border,
     flexDirection: 'column',
   },
@@ -70,7 +70,7 @@ const sb = StyleSheet.create({
     flexDirection: 'column',
   },
   closed: {
-    width: 44, flexShrink: 0, backgroundColor: C.tagsSidebarBg,
+    width: 66, flexShrink: 0, backgroundColor: C.tagsSidebarBg,
     borderRightWidth: 1, borderRightColor: C.border,
     alignItems: 'center', paddingTop: 12,
   },
