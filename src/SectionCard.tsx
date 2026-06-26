@@ -156,6 +156,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
       {/* Header: tags + actions */}
       <View style={s.header}>
         <View style={s.tagRow}>
+          {section.isPinned && <Text style={s.pinnedEmoji}>📌</Text>}
           {localTags.map(t => (
             <View key={t.id} style={s.tagChip}>
               <View style={[s.tagDot, { backgroundColor: t.color }]} />
@@ -332,6 +333,7 @@ const s = StyleSheet.create({
   headerActions:{ flexDirection: 'row', alignItems: 'center', gap: 6 },
   actionBtn:    { paddingVertical: 5, paddingLeft: 6, paddingRight: 0 },
   actionIcon:   { fontSize: 14, color: '#a0a8b8' },
+  pinnedEmoji:  { fontSize: 13 },
   pinIcon:      { alignItems: 'center', gap: 1 },
   pinHead:      { width: 9, height: 9, borderRadius: 5, borderWidth: 1.5, borderColor: '#a0a8b8', backgroundColor: 'transparent' },
   pinHeadOn:    { backgroundColor: '#4a5a7a', borderColor: '#4a5a7a' },
