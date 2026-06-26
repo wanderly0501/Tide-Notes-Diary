@@ -211,7 +211,10 @@ function DocCard({ doc, onOpen, onDelete }: { doc: TideDocument; onOpen(): void;
   const [hover, setHover] = useState(false);
   const d = new Date(doc.updatedAt);
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const meta = `Edited ${months[d.getMonth()]} ${d.getDate()} · ${doc.wordCount} words`;
+  const meta = `${months[d.getMonth()]} ${d.getDate()} · ${doc.wordCount}w`;
+  const snippet = doc.content
+    ? doc.content.replace(/<[^>]+>/g, '').replace(/\*\*|__|==|\*/g, '').replace(/\s+/g, ' ').trim()
+    : '';
 
   return (
     <TouchableOpacity
@@ -222,28 +225,19 @@ function DocCard({ doc, onOpen, onDelete }: { doc: TideDocument; onOpen(): void;
       onMouseLeave={() => setHover(false)}
       activeOpacity={0.85}
     >
-      {/* Paper preview */}
-      <View style={s.preview}>
-        <View style={s.previewTitle} />
-        <View style={[s.previewLine, { width: '100%' }]} />
-        <View style={[s.previewLine, { width: '100%' }]} />
-        <View style={[s.previewLine, { width: '85%' }]} />
-        <View style={[s.previewLine, { width: '92%' }]} />
-        {doc.content ? (
-          <Text style={s.previewText} numberOfLines={2}>{doc.content.replace(/^#+\s/gm, '')}</Text>
-        ) : null}
-      </View>
-
-      <View style={s.cardMeta}>
+      <View style={s.cardHeader}>
         <View style={[s.dot, { backgroundColor: doc.color }]} />
         <Text style={s.cardTitle} numberOfLines={1}>{doc.title}</Text>
-      </View>
-      <View style={s.cardFooter}>
-        <Text style={s.cardMetaTxt}>{meta}</Text>
-        <TouchableOpacity onPress={onDelete} style={s.delBtn}>
+        <TouchableOpacity onPress={onDelete} style={s.delBtn} hitSlop={8}>
           <Text style={s.delTxt}>🗑</Text>
         </TouchableOpacity>
       </View>
+      {snippet ? (
+        <Text style={s.snippet} numberOfLines={2}>{snippet}</Text>
+      ) : (
+        <Text style={s.snippetEmpty}>No content yet</Text>
+      )}
+      <Text style={s.cardMetaTxt}>{meta}</Text>
     </TouchableOpacity>
   );
 }
@@ -258,30 +252,25 @@ const s = StyleSheet.create({
   newBtn:  { flexDirection: 'row', alignItems: 'center', gap: 7, height: 38, paddingHorizontal: 18, backgroundColor: C.buttonBlue, borderRadius: R.pill },
   newBtnIcon: { fontSize: 16, color: C.white },
   newBtnTxt:  { fontSize: 13.5, fontWeight: '600', color: C.white },
-  grid:    { flexDirection: 'row', flexWrap: 'wrap', gap: 16 },
+  grid:    { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   card:    {
-    flexBasis: '47%',
+    flexBasis: '30%',
     flexGrow: 1,
-    minWidth: 280,
+    minWidth: 200,
+    maxWidth: 340,
     backgroundColor: C.card, borderWidth: 1, borderColor: C.border,
-    borderRadius: R.lg, padding: 18, gap: 10,
+    borderRadius: R.md, padding: 12, gap: 6,
     ...Platform.select({ web: { transition: 'border-color 0.15s' } }),
   },
-  cardHover: { borderColor: '#b6bfd8' },
-  preview: {
-    height: 96, borderRadius: R.sm, borderWidth: 1, borderColor: '#e1e5f1',
-    backgroundColor: C.white, padding: 11, gap: 5, overflow: 'hidden',
-  },
-  previewTitle:{ width: '60%', height: 7, borderRadius: 3, backgroundColor: '#dde2f0' },
-  previewLine: { height: 5, borderRadius: 3, backgroundColor: '#ebeef8' },
-  previewText: { fontSize: 9, color: '#c0c8d8', lineHeight: 13 },
-  cardMeta:  { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dot:       { width: 8, height: 8, borderRadius: 4 },
-  cardTitle: { fontSize: 15, fontWeight: '600', color: C.text, flex: 1 },
-  cardFooter:{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cardMetaTxt:{ fontSize: 12.5, color: C.textMuted },
-  delBtn:    { padding: 4 },
-  delTxt:    { fontSize: 14 },
+  cardHover:   { borderColor: '#b6bfd8' },
+  cardHeader:  { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  dot:         { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
+  cardTitle:   { fontSize: 13.5, fontWeight: '600', color: C.text, flex: 1 },
+  snippet:     { fontSize: 12, color: C.textMuted, lineHeight: 17 },
+  snippetEmpty:{ fontSize: 12, color: C.border, fontStyle: 'italic' },
+  cardMetaTxt: { fontSize: 11, color: C.textMuted },
+  delBtn:      { padding: 2 },
+  delTxt:      { fontSize: 13 },
   empty:     { paddingTop: 80, alignItems: 'center' },
   emptyTitle:{ fontSize: 18, fontWeight: '600', color: C.text, marginBottom: 8 },
   emptyBody: { fontSize: 14, color: C.textMuted, textAlign: 'center', maxWidth: 340 },
