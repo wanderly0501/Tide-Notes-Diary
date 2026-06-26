@@ -156,7 +156,6 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
       {/* Header: tags + actions */}
       <View style={s.header}>
         <View style={s.tagRow}>
-          {section.isPinned && <Text style={s.pinIcon}>📌</Text>}
           {localTags.map(t => (
             <View key={t.id} style={s.tagChip}>
               <View style={[s.tagDot, { backgroundColor: t.color }]} />
@@ -196,7 +195,10 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
             <Text style={s.actionIcon}>✎</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onTogglePin(section.id, !section.isPinned)} style={s.actionBtn}>
-            <View style={[s.pinArrow, section.isPinned && s.pinArrowOn]} />
+            <View style={s.pinIcon}>
+              <View style={[s.pinHead, section.isPinned && s.pinHeadOn]} />
+              <View style={[s.pinShaft, section.isPinned && s.pinShaftOn]} />
+            </View>
           </TouchableOpacity>
           <TouchableOpacity onPress={confirmDelete} style={s.actionBtn}>
             <Text style={s.actionIcon}>✕</Text>
@@ -324,15 +326,17 @@ const s = StyleSheet.create({
   tagMenuTick:  { fontSize: 9, color: C.white, fontWeight: '700' },
   tagMenuDot:   { width: 8, height: 8, borderRadius: 4 },
   tagMenuTxt:   { fontSize: 13, color: C.textBody },
-  pinIcon:      { fontSize: 13 },
   reminderBadge:{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, backgroundColor: '#f4e2e2', borderRadius: R.pill, paddingHorizontal: 11, paddingVertical: 4, marginBottom: 8 },
   reminderIcon: { fontSize: 12 },
   reminderTxt:  { fontSize: 12, fontWeight: '600', color: C.pinkText },
   headerActions:{ flexDirection: 'row', alignItems: 'center', gap: 6 },
   actionBtn:    { paddingVertical: 5, paddingLeft: 6, paddingRight: 0 },
   actionIcon:   { fontSize: 14, color: '#a0a8b8' },
-  pinArrow:     { width: 0, height: 0, borderLeftWidth: 5, borderRightWidth: 5, borderBottomWidth: 9, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderBottomColor: '#a0a8b8' },
-  pinArrowOn:   { borderBottomColor: '#5a6a8a' },
+  pinIcon:      { alignItems: 'center', gap: 1 },
+  pinHead:      { width: 9, height: 9, borderRadius: 5, borderWidth: 1.5, borderColor: '#a0a8b8', backgroundColor: 'transparent' },
+  pinHeadOn:    { backgroundColor: '#4a5a7a', borderColor: '#4a5a7a' },
+  pinShaft:     { width: 1.5, height: 5, backgroundColor: '#a0a8b8', borderRadius: 1 },
+  pinShaftOn:   { backgroundColor: '#4a5a7a' },
   foldPreview:  { fontSize: 13.5, color: C.textMuted, marginTop: 6, marginBottom: 2 },
   foldBtn:      { alignSelf: 'flex-end', marginTop: 1, paddingBottom: 2, paddingLeft: 4, paddingRight: 0 },
   bodyTxt:      { fontSize: 14.5, lineHeight: 23, color: C.textBody, marginBottom: 8, outlineWidth: 0 } as any,
