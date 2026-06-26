@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "default",
     "userInterfaceStyle": "light",
+    "icon": "./logo/2.png",
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#edf0f6"
@@ -13,10 +14,12 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./logo/2.png"
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./logo/2.png",
         "backgroundColor": "#edf0f6"
       }
     },
