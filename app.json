@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Tide",
+    "slug": "tide-notes",
+    "version": "1.0.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#edf0f6"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#edf0f6"
+      }
+    },
+    "scheme": "tide",
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      [
+        "expo-sqlite"
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Tide to attach photos to notes."
+        }
+      ],
+      "expo-asset",
+      "expo-web-browser"
+    ]
+  }
+}

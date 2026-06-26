@@ -1,0 +1,33 @@
+export const C = {
+  bg: '#edf0f6',
+  sidebarBg: '#eef1f8',
+  tagsSidebarBg: '#ebeff8',
+  card: '#fdfdfe',
+  border: '#d8dde9',
+  borderLight: '#e1e5f1',
+  primary: '#002FA7',
+  primaryLight: '#e4e9f6',
+  primaryHover: '#d4ddf2',
+  text: '#20242f',
+  textBody: '#383d4b',
+  textMuted: '#98a0b4',
+  textLabel: '#6f7588',
+  tagBg: '#eaeef8',
+  tagText: '#5a6072',
+  toolbar: '#f4f6fc',
+  toolbarHover: '#e2e8f7',
+  today: '#e4e9f8',
+  todayBar: '#7b9de0',
+  todayText: '#3a5db0',
+  buttonBlue: '#4a7be0',
+  buttonBlueBg: '#dce6f7',
+  pinkText: '#9c6a70',
+  pinkSoft: '#f4e2e2',
+  pinkBar: '#d99ba2',
+  bullet: '#94a0c4',
+  white: '#fff',
+  success: '#15803d',
+};
+
+export const R = { sm: 6, md: 8, lg: 11, pill: 999 };
+export const S = { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24 };
