@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   Modal, StyleSheet, Platform, Image, KeyboardAvoidingView, StatusBar, ActivityIndicator,
@@ -142,8 +143,9 @@ export function SectionModal({ visible, initial, onClose, onSave }: Props) {
                   style={[s.reminderToggle, isReminder && s.reminderToggleOn]}
                   onPress={() => setIsReminder(!isReminder)}
                 >
+                  <Ionicons name="alarm-outline" size={14} color={isReminder ? C.pinkText : C.textMuted} />
                   <Text style={[s.reminderToggleTxt, isReminder && { color: C.pinkText }]}>
-                    ⏰  {isReminder ? 'Reminder on' : 'Set reminder'}
+                    {isReminder ? 'Reminder on' : 'Set reminder'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -222,7 +224,8 @@ export function SectionModal({ visible, initial, onClose, onSave }: Props) {
 
                     {blocks.length > 1 && (
                       <TouchableOpacity onPress={() => removeBlock(idx)} style={s.removeBlock}>
-                        <Text style={s.removeBlockTxt}>✕ Remove block</Text>
+                        <Ionicons name="close" size={12} color={C.textMuted} />
+                        <Text style={s.removeBlockTxt}>Remove block</Text>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -343,7 +346,7 @@ function CheckboxEditor({ items, onChange }: {
       {items.map((item, i) => (
         <View key={i} style={cb.row}>
           <TouchableOpacity style={[cb.box, item.checked && cb.boxChecked]} onPress={() => update(i, { checked: !item.checked })}>
-            {item.checked && <Text style={cb.tick}>✓</Text>}
+            {item.checked && <Ionicons name="checkmark" size={11} color={C.white} />}
           </TouchableOpacity>
           <TextInput
             style={[cb.input, item.checked && cb.inputDone]}
@@ -356,7 +359,7 @@ function CheckboxEditor({ items, onChange }: {
           />
           {items.length > 1 && (
             <TouchableOpacity onPress={() => remove(i)} style={cb.del}>
-              <Text style={cb.delTxt}>✕</Text>
+              <Ionicons name="close" size={14} color={C.textMuted} />
             </TouchableOpacity>
           )}
         </View>
@@ -506,7 +509,7 @@ const s = StyleSheet.create({
     borderRadius: R.sm, paddingHorizontal: S.sm, paddingVertical: 6,
     backgroundColor: C.white, outlineWidth: 0,
   } as any,
-  reminderToggle:    { paddingHorizontal: 12, paddingVertical: 8, borderRadius: R.md, borderWidth: 1, borderColor: C.border, backgroundColor: C.white },
+  reminderToggle:    { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: R.md, borderWidth: 1, borderColor: C.border, backgroundColor: C.white },
   reminderToggleOn:  { backgroundColor: '#f4e2e2', borderColor: C.pinkBar },
   reminderToggleTxt: { fontSize: 13, color: C.textLabel },
   reminderDateRow:   { marginBottom: S.lg },
@@ -518,7 +521,7 @@ const s = StyleSheet.create({
   tagName:       { fontSize: 13, color: C.textMuted },
   blockWrap:     { marginBottom: S.lg, backgroundColor: C.white, borderRadius: R.md, borderWidth: 1, borderColor: C.borderLight, padding: S.md },
   textBlock:     { fontSize: 14.5, lineHeight: 23, color: C.textBody, minHeight: 80, outlineWidth: 0 } as any,
-  removeBlock:   { alignSelf: 'flex-end', marginTop: 6, paddingVertical: 4, paddingHorizontal: 8, borderRadius: R.sm },
+  removeBlock:   { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end', marginTop: 6, paddingVertical: 4, paddingHorizontal: 8, borderRadius: R.sm },
   removeBlockTxt:{ fontSize: 12, color: '#d32f2f' },
   addRowOuter:   { borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.toolbar, paddingBottom: Platform.OS === 'web' ? 0 : 20 },
   addRow:        { flexDirection: 'row', gap: 10, padding: S.lg, maxWidth: 760, width: '100%', alignSelf: 'center' },

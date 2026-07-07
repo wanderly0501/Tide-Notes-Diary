@@ -1,60 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, Image, StatusBar, Modal, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 const STATUS_BAR_HEIGHT = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0;
 import { C, R } from './theme';
 import { supabase } from './supabase';
-
-function PlusIcon({ color = '#fff', size = 22, thickness = 3 }: { color?: string; size?: number; thickness?: number }) {
-  return (
-    <View style={{ width: size, height: size }}>
-      <View style={{ position: 'absolute', top: (size - thickness) / 2, left: 0, right: 0, height: thickness, backgroundColor: color, borderRadius: thickness / 2 }} />
-      <View style={{ position: 'absolute', left: (size - thickness) / 2, top: 0, bottom: 0, width: thickness, backgroundColor: color, borderRadius: thickness / 2 }} />
-    </View>
-  );
-}
-
-function CalendarIcon({ color = C.textLabel, size = 22 }: { color?: string; size?: number }) {
-  const s = size;
-  return (
-    <View style={{ width: s, height: s }}>
-      {/* Outer box */}
-      <View style={{
-        position: 'absolute', top: s * 0.18, left: 0, right: 0, bottom: 0,
-        borderWidth: 1.5, borderColor: color, borderRadius: 2,
-        overflow: 'hidden',
-      }}>
-        {/* Header fill */}
-        <View style={{ height: s * 0.27, backgroundColor: color }} />
-      </View>
-      {/* Left peg */}
-      <View style={{ position: 'absolute', top: 0, left: s * 0.23, width: 2, height: s * 0.32, backgroundColor: color, borderRadius: 1 }} />
-      {/* Right peg */}
-      <View style={{ position: 'absolute', top: 0, left: s * 0.65, width: 2, height: s * 0.32, backgroundColor: color, borderRadius: 1 }} />
-    </View>
-  );
-}
-
-function PersonIcon({ color = '#fff', size = 18 }: { color?: string; size?: number }) {
-  const head = size * 0.38;
-  const bodyW = size * 0.64;
-  const bodyH = size * 0.38;
-  return (
-    <View style={{ width: size, height: size }}>
-      <View style={{
-        position: 'absolute', top: 0, alignSelf: 'center',
-        width: head, height: head, borderRadius: head / 2,
-        borderWidth: 1.5, borderColor: color, backgroundColor: 'transparent',
-      }} />
-      <View style={{
-        position: 'absolute', bottom: 0, alignSelf: 'center',
-        width: bodyW, height: bodyH,
-        borderTopLeftRadius: bodyW / 2, borderTopRightRadius: bodyW / 2,
-        borderWidth: 1.5, borderBottomWidth: 0, borderColor: color, backgroundColor: 'transparent',
-      }} />
-    </View>
-  );
-}
 import { useApp } from './context';
 
 // ── Account info modal ────────────────────────────────────────────────────────
@@ -153,7 +103,7 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
         {/* Left: S/D switch (or back button in editor) */}
         {isEditor ? (
           <TouchableOpacity style={m.iconBtn} onPress={() => setView('docs')}>
-            <Text style={m.backTxt}>‹</Text>
+            <Ionicons name="chevron-back" size={26} color={C.primary} />
           </TouchableOpacity>
         ) : (
           <View style={m.tabs}>
@@ -175,7 +125,7 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
         <View style={m.right}>
           {!isEditor && isDocs && (
             <TouchableOpacity style={[m.iconBtn, filesOpen && m.iconBtnOn]} onPress={onToggleFiles}>
-              <Text style={[m.hashTxt, filesOpen && m.iconTxtOn]}>☰</Text>
+              <Ionicons name="menu-outline" size={22} color={filesOpen ? C.buttonBlue : C.textLabel} />
             </TouchableOpacity>
           )}
           {isStream && (
@@ -184,7 +134,7 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
                 <Text style={[m.hashTxt, tagsOpen && m.iconTxtOn]}>#</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[m.iconBtn, timelineOpen && m.iconBtnOn]} onPress={onToggleTimeline}>
-                <CalendarIcon color={timelineOpen ? C.buttonBlue : C.textLabel} size={15} />
+                <Ionicons name="calendar-outline" size={18} color={timelineOpen ? C.buttonBlue : C.textLabel} />
               </TouchableOpacity>
             </>
           )}
@@ -210,17 +160,17 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
       <View style={s.right}>
         {isStream && onNewSection && (
           <TouchableOpacity style={s.newBtn} onPress={onNewSection} activeOpacity={0.8}>
-            <PlusIcon size={14} thickness={2} />
+            <Ionicons name="add" size={16} color="#fff" />
           </TouchableOpacity>
         )}
         {isDocs && onNewDoc && (
           <TouchableOpacity style={s.newBtn} onPress={onNewDoc} activeOpacity={0.8}>
-            <PlusIcon size={14} thickness={2} />
+            <Ionicons name="add" size={16} color="#fff" />
           </TouchableOpacity>
         )}
         {searchOpen ? (
           <View style={s.search}>
-            <Text style={s.searchIcon}>⌕</Text>
+            <Ionicons name="search-outline" size={15} color={C.textMuted} />
             <TextInput
               ref={inputRef}
               style={s.searchInput}
@@ -232,16 +182,16 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
               outlineStyle="none"
             />
             <TouchableOpacity onPress={closeSearch}>
-              <Text style={s.searchClose}>✕</Text>
+              <Ionicons name="close" size={14} color={C.textMuted} />
             </TouchableOpacity>
           </View>
         ) : (
           <TouchableOpacity style={s.searchBtn} onPress={openSearch} activeOpacity={0.7}>
-            <Text style={s.searchBtnIcon}>⌕</Text>
+            <Ionicons name="search-outline" size={20} color={C.textLabel} />
           </TouchableOpacity>
         )}
         <TouchableOpacity ref={avatarRef as any} style={s.avatar} activeOpacity={0.8} onPress={openAccountMenu}>
-          <PersonIcon size={14} />
+          <Ionicons name="person-outline" size={14} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -284,17 +234,17 @@ export function MobileBottomBar({ onNew, onSearch }: BottomBarProps) {
     <View style={mb.bar}>
       {/* Left: Search */}
       <TouchableOpacity style={mb.sideBtn} onPress={onSearch} activeOpacity={0.7}>
-        <Text style={mb.sideBtnTxt}>⌕</Text>
+        <Ionicons name="search-outline" size={24} color={C.textLabel} />
       </TouchableOpacity>
 
       {/* Center: + New */}
       <TouchableOpacity style={mb.newBtn} onPress={onNew} activeOpacity={0.8}>
-        <PlusIcon size={22} thickness={3} />
+        <Ionicons name="add" size={24} color="#fff" />
       </TouchableOpacity>
 
       {/* Right: Account */}
       <TouchableOpacity style={mb.sideBtn} activeOpacity={0.8} onPress={() => setMenuOpen(true)}>
-        <PersonIcon color={C.textLabel} size={23} />
+        <Ionicons name="person-outline" size={24} color={C.textLabel} />
       </TouchableOpacity>
 
       {/* Account options sheet */}
@@ -328,7 +278,7 @@ export function MobileSearchBar({ onClose }: { onClose(): void }) {
   React.useEffect(() => { setTimeout(() => inputRef.current?.focus(), 50); }, []);
   return (
     <View style={ms.bar}>
-      <Text style={ms.icon}>⌕</Text>
+      <Ionicons name="search-outline" size={18} color={C.textMuted} />
       <TextInput
         ref={inputRef}
         style={ms.input}
@@ -338,7 +288,7 @@ export function MobileSearchBar({ onClose }: { onClose(): void }) {
         placeholderTextColor={C.textMuted}
       />
       <TouchableOpacity onPress={() => { setSearchQuery(''); onClose(); }}>
-        <Text style={ms.close}>✕</Text>
+        <Ionicons name="close" size={18} color={C.textMuted} />
       </TouchableOpacity>
     </View>
   );
@@ -385,9 +335,7 @@ const mb = StyleSheet.create({
 // ── Mobile search bar styles ──────────────────────────────────────────────────
 const ms = StyleSheet.create({
   bar:   { flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, paddingHorizontal: 16, backgroundColor: C.toolbar, borderBottomWidth: 1, borderBottomColor: C.border },
-  icon:  { fontSize: 20, color: C.textMuted },
   input: { flex: 1, fontSize: 15, color: C.text },
-  close: { fontSize: 14, color: C.textMuted, padding: 4 },
 });
 
 // ── Web styles (unchanged) ────────────────────────────────────────────────────

@@ -3,22 +3,11 @@ import {
   View, Text, Image, TextInput, TouchableOpacity, StyleSheet,
   Alert, Platform, Modal, Pressable, ScrollView, Dimensions,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { C, R } from './theme';
 import { Section, Block, CheckboxBlock, BulletsBlock } from './types';
 import { formatDateDisplay } from './utils';
 import { useApp } from './context';
-
-function Chevron({ up }: { up: boolean }) {
-  return (
-    <View style={{
-      width: 8, height: 8,
-      borderTopWidth: 2, borderLeftWidth: 2,
-      borderColor: '#b0b8c8',
-      transform: [{ rotate: up ? '45deg' : '225deg' }],
-      marginTop: up ? 2 : 0, marginBottom: up ? 0 : 2,
-    }} />
-  );
-}
 
 interface Props {
   section: Section;
@@ -49,7 +38,7 @@ function ImageViewer({ uri, onClose }: { uri: string; onClose(): void }) {
       <Pressable style={iv.overlay} onPress={onClose}>
         <Image source={{ uri }} style={iv.img} resizeMode="contain" />
         <TouchableOpacity style={iv.closeBtn} onPress={onClose} hitSlop={16}>
-          <Text style={iv.closeTxt}>✕</Text>
+          <Ionicons name="close" size={18} color="#fff" />
         </TouchableOpacity>
       </Pressable>
     </Modal>
@@ -148,7 +137,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
       {/* Reminder badge */}
       {isReminder && (
         <View style={s.reminderBadge}>
-          <Text style={s.reminderIcon}>⏰</Text>
+          <Ionicons name="alarm-outline" size={12} color={C.pinkText} />
           <Text style={s.reminderTxt}>Reminder · {formatDateDisplay(section.reminderDate!)}</Text>
         </View>
       )}
@@ -165,7 +154,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
           ))}
           {(onUpdate || onTagsChange) && (
             <TouchableOpacity ref={addTagBtnRef} onPress={openTagMenu} style={s.addTagBtn}>
-              <Text style={s.addTagTxt}>＋</Text>
+              <Ionicons name="add" size={14} color={C.textMuted} />
             </TouchableOpacity>
           )}
         </View>
@@ -180,7 +169,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
                 return (
                   <TouchableOpacity key={t.id} style={s.tagMenuItem} onPress={() => toggleSectionTag(t.id)}>
                     <View style={[s.tagMenuCheck, selected && { backgroundColor: t.color, borderColor: t.color }]}>
-                      {selected && <Text style={s.tagMenuTick}>✓</Text>}
+                      {selected && <Ionicons name="checkmark" size={9} color={C.white} />}
                     </View>
                     <View style={[s.tagMenuDot, { backgroundColor: t.color }]} />
                     <Text style={s.tagMenuTxt}>{t.name}</Text>
@@ -193,15 +182,17 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
 
         <View style={s.headerActions}>
           <TouchableOpacity onPress={() => onEdit(section)} style={s.actionBtn}>
-            <Text style={s.actionIcon}>✎</Text>
+            <Ionicons name="create-outline" size={15} color="#a0a8b8" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onTogglePin(section.id, !section.isPinned)} style={s.actionBtn}>
-            <Text style={[s.pinArrow, section.isPinned && s.pinArrowOn]}>
-              {section.isPinned ? '↓' : '↑'}
-            </Text>
+            <Ionicons
+              name={section.isPinned ? 'arrow-down' : 'arrow-up-outline'}
+              size={15}
+              color={section.isPinned ? '#4a5a7a' : '#a0a8b8'}
+            />
           </TouchableOpacity>
           <TouchableOpacity onPress={confirmDelete} style={s.actionBtn}>
-            <Text style={s.actionIcon}>✕</Text>
+            <Ionicons name="close-outline" size={16} color="#a0a8b8" />
           </TouchableOpacity>
         </View>
       </View>
@@ -258,7 +249,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
                     style={[s.checkBox, item.checked && s.checkBoxDone]}
                     onPress={() => toggleCheckbox(i, j)}
                   >
-                    {item.checked && <Text style={s.checkTick}>✓</Text>}
+                    {item.checked && <Ionicons name="checkmark" size={10} color={C.white} />}
                   </TouchableOpacity>
                   <Text style={[s.checkTxt, item.checked && s.checkTxtDone]}>{item.text}</Text>
                 </View>
@@ -294,7 +285,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
 
       {/* Fold / unfold */}
       <TouchableOpacity style={s.foldBtn} onPress={() => setFolded(f => !f)} activeOpacity={0.6}>
-        <Chevron up={!folded} />
+        <Ionicons name={folded ? 'chevron-down-outline' : 'chevron-up-outline'} size={12} color="#b0b8c8" />
       </TouchableOpacity>
 
       {viewerUri && <ImageViewer uri={viewerUri} onClose={() => setViewerUri(null)} />}

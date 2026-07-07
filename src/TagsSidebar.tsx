@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal, Alert, Pressable, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { C, R, S } from './theme';
 import { useApp } from './context';
 import { uuid } from './utils';
@@ -85,7 +86,7 @@ export function TagsSidebar() {
       <View style={s.header}>
         <Text style={s.headerTxt}>TAGS</Text>
         <TouchableOpacity style={s.chevronBtn} onPress={() => setOpen(false)}>
-          <Text style={s.chevron}>›</Text>
+          <Ionicons name="chevron-forward" size={18} color={C.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -103,7 +104,7 @@ export function TagsSidebar() {
                   backgroundColor: checked ? t.color : C.white,
                   borderColor: checked ? t.color : C.border,
                 }]}>
-                  {checked && <Text style={s.check}>✓</Text>}
+                  {checked && <Ionicons name="checkmark" size={11} color={C.white} />}
                 </View>
                 <Text style={s.tagName}>{t.name}</Text>
               </TouchableOpacity>
@@ -143,10 +144,12 @@ export function TagsSidebar() {
               ) : (
                 <>
                   <TouchableOpacity style={s.ctxItem} onPress={() => setRenaming(true)}>
-                    <Text style={s.ctxItemTxt}>✎  Rename</Text>
+                    <Ionicons name="create-outline" size={13} color={C.textBody} />
+                    <Text style={s.ctxItemTxt}>Rename</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={s.ctxItem} onPress={() => handleDelete(ctxTag.id, ctxTag.name)}>
-                    <Text style={[s.ctxItemTxt, { color: '#c0392b' }]}>✕  Delete</Text>
+                    <Ionicons name="close" size={13} color="#c0392b" />
+                    <Text style={[s.ctxItemTxt, { color: '#c0392b' }]}>Delete</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -203,7 +206,7 @@ export function TagsSidebar() {
               )}
             </View>
             <TouchableOpacity style={s.newTagBtn} onPress={() => setAdding(true)}>
-              <Text style={s.plusIcon}>＋</Text>
+              <Ionicons name="add" size={14} color={C.textLabel} />
               <Text style={s.newTagTxt}>New tag</Text>
             </TouchableOpacity>
           </>
@@ -250,7 +253,7 @@ const s = StyleSheet.create({
     borderRadius: R.md, minWidth: 140, zIndex: 9999,
     shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
   },
-  ctxItem:        { paddingHorizontal: 14, paddingVertical: 10 },
+  ctxItem:        { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 10 },
   ctxItemTxt:     { fontSize: 13.5, color: C.textBody },
   ctxRenameRow:   { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10 },
   ctxRenameInput: { flex: 1, fontSize: 13.5, color: C.text, borderWidth: 1, borderColor: C.border, borderRadius: R.sm, paddingHorizontal: 8, paddingVertical: 4, outlineWidth: 0 } as any,

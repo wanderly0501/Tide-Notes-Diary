@@ -1,21 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform } from 'react-native';
-
-function CalendarIcon({ color = C.textLabel, size = 22 }: { color?: string; size?: number }) {
-  const sz = size;
-  return (
-    <View style={{ width: sz, height: sz }}>
-      <View style={{
-        position: 'absolute', top: sz * 0.18, left: 0, right: 0, bottom: 0,
-        borderWidth: 1.5, borderColor: color, borderRadius: 2, overflow: 'hidden',
-      }}>
-        <View style={{ height: sz * 0.27, backgroundColor: color }} />
-      </View>
-      <View style={{ position: 'absolute', top: 0, left: sz * 0.23, width: 2, height: sz * 0.32, backgroundColor: color, borderRadius: 1 }} />
-      <View style={{ position: 'absolute', top: 0, left: sz * 0.65, width: 2, height: sz * 0.32, backgroundColor: color, borderRadius: 1 }} />
-    </View>
-  );
-}
+import { Ionicons } from '@expo/vector-icons';
 import { C, R, S } from './theme';
 import { useApp } from './context';
 import { formatMonthLabel, todayISO } from './utils';
@@ -53,7 +38,7 @@ export function TimelineSidebar({ onDatePress }: Props) {
     return (
       <View style={[s.sidebar, s.sidebarClosed]}>
         <TouchableOpacity style={s.collapseBtn} onPress={() => setOpen(true)}>
-          <CalendarIcon size={15} />
+          <Ionicons name="calendar-outline" size={15} color={C.textLabel} />
         </TouchableOpacity>
         {months.slice(0, 1).map(m =>
           m.days.slice(0, 4).map(d => (
@@ -69,7 +54,7 @@ export function TimelineSidebar({ onDatePress }: Props) {
       <View style={s.header}>
         <Text style={s.headerTxt}>TIMELINE</Text>
         <TouchableOpacity style={s.chevronBtn} onPress={() => setOpen(false)}>
-          <Text style={s.chevron}>‹</Text>
+          <Ionicons name="chevron-back" size={18} color={C.textMuted} />
         </TouchableOpacity>
       </View>
 

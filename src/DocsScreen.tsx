@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet,
   TextInput, Modal, Platform, Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { C, R, S } from './theme';
 import { useApp } from './context';
 import { TideDocument } from './types';
@@ -22,7 +23,7 @@ function DocsSidebar({ onClose }: { onClose?: () => void }) {
     return (
       <View style={sb.closed}>
         <TouchableOpacity style={sb.iconBtn} onPress={() => setOpen(true)}>
-          <Text style={sb.iconTxt}>☰</Text>
+          <Ionicons name="menu-outline" size={18} color={C.textLabel} />
         </TouchableOpacity>
       </View>
     );
@@ -33,7 +34,7 @@ function DocsSidebar({ onClose }: { onClose?: () => void }) {
       <View style={sb.header}>
         <Text style={sb.headerTxt}>FILES</Text>
         <TouchableOpacity style={sb.chevronBtn} onPress={isMobile ? onClose : () => setOpen(false)}>
-          <Text style={sb.chevron}>{isMobile ? '›' : '‹'}</Text>
+          <Ionicons name={isMobile ? 'chevron-forward' : 'chevron-back'} size={18} color={C.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -229,7 +230,7 @@ function DocCard({ doc, onOpen, onDelete }: { doc: TideDocument; onOpen(): void;
         <View style={[s.dot, { backgroundColor: doc.color }]} />
         <Text style={s.cardTitle} numberOfLines={1}>{doc.title}</Text>
         <TouchableOpacity onPress={onDelete} style={s.delBtn} hitSlop={8}>
-          <Text style={s.delTxt}>🗑</Text>
+          <Ionicons name="trash-outline" size={14} color={C.textMuted} />
         </TouchableOpacity>
       </View>
       {snippet ? (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, createElement } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Platform,
 } from 'react-native';
@@ -400,7 +401,7 @@ export function EditorScreen({ docId }: Props) {
           {isWeb && (
             <>
               <TouchableOpacity style={s.backBtn} onPress={() => setView('docs')}>
-                <Text style={s.backChevron}>‹</Text>
+                <Ionicons name="chevron-back" size={24} color={C.text} />
               </TouchableOpacity>
               <View style={s.barDiv} />
             </>
@@ -423,7 +424,7 @@ export function EditorScreen({ docId }: Props) {
         </View>
         <View style={s.subRight}>
           <View style={s.savedBadge}>
-            {saved && <Text style={s.savedIcon}>✓</Text>}
+            {saved && <Ionicons name="checkmark" size={13} color={C.success} />}
             <Text style={s.savedTxt}>{saved ? 'Saved' : 'Saving…'}</Text>
           </View>
         </View>
@@ -466,7 +467,7 @@ export function EditorScreen({ docId }: Props) {
           </TouchableOpacity>
           <View style={s.fmtDiv} />
           <TouchableOpacity style={s.fmtBtn} onPress={addLink}>
-            <Text style={s.fmtTxt}>🔗</Text>
+            <Ionicons name="link-outline" size={15} color={C.textBody} />
           </TouchableOpacity>
         </View>
       ) : (

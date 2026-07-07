@@ -1,4 +1,5 @@
 import React, { useRef, useState, useMemo, useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, RefreshControl,
 } from 'react-native';
@@ -100,7 +101,7 @@ export function StreamScreen({
         {upcomingReminders.length > 0 && (
           <View>
             <View style={st.reminderHeader}>
-              <Text style={st.reminderIcon}>⏰</Text>
+              <Ionicons name="alarm-outline" size={13} color="#c07000" />
               <Text style={st.reminderLabel}>Due Tomorrow</Text>
             </View>
             {upcomingReminders.map(section => (
