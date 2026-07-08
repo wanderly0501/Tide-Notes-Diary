@@ -94,21 +94,57 @@
       margin-bottom: 28px;
     }
     .back:hover { text-decoration: underline; }
-    .delete-btn {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 11px 22px;
+    .delete-box {
+      margin-top: 14px;
+      background: #fdf2f2;
+      border: 1px solid #f0caca;
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .delete-box p {
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #5a3030;
+    }
+    .delete-email {
+      font-weight: 600;
+      color: #c0392b;
+      word-break: break-all;
+    }
+    .delete-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .btn-copy, .btn-gmail {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 7px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+    }
+    .btn-copy {
       background: #fff;
       color: #c0392b;
       border: 1.5px solid #c0392b;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
     }
-    .delete-btn:hover {
-      background: #fdf2f2;
-      text-decoration: none;
+    .btn-copy:hover { background: #faeaea; }
+    .btn-gmail {
+      background: #c0392b;
+      color: #fff;
+    }
+    .btn-gmail:hover { background: #a93226; text-decoration: none; }
+    #copy-confirm {
+      font-size: 13px;
+      color: #27ae60;
+      margin-top: 8px;
+      display: none;
     }
     @media (max-width: 600px) {
       .card { padding: 32px 24px; }
@@ -172,9 +208,15 @@
 
     <h2>Request Account & Data Deletion</h2>
     <p>You may request the permanent deletion of your account and all associated data (notes, images, tags, and account information) at any time. We will process your request within 30 days.</p>
-    <a class="delete-btn" href="mailto:wanderly0501@gmail.com?subject=Data%20Deletion%20Request&amp;body=Hi%2C%0A%0AI%20would%20like%20to%20request%20the%20deletion%20of%20my%20Tide%20account%20and%20all%20associated%20data.%0A%0AAccount%20email%3A%20%5Byour%20account%20email%5D%0A%0AThank%20you.">
-      Request Data Deletion
-    </a>
+    <div class="delete-box">
+      <p>Email your deletion request to: <span class="delete-email">wanderly0501@gmail.com</span></p>
+      <p>Please include the email address associated with your Tide account in your message.</p>
+      <div class="delete-actions">
+        <button class="btn-copy" onclick="copyEmail()">Copy email address</button>
+        <a class="btn-gmail" href="https://mail.google.com/mail/?view=cm&fs=1&to=wanderly0501@gmail.com&su=Data+Deletion+Request&body=Hi%2C%0A%0AI+would+like+to+request+the+deletion+of+my+Tide+account+and+all+associated+data.%0A%0AAccount+email%3A+%5Byour+account+email%5D%0A%0AThank+you." target="_blank" rel="noopener">Open in Gmail</a>
+      </div>
+      <p id="copy-confirm">✓ Email address copied!</p>
+    </div>
 
     <div class="divider"></div>
 
@@ -182,5 +224,14 @@
     <p>If you have any questions about this Privacy Policy, please contact us at:<br/>
     <a href="mailto:wanderly0501@gmail.com">wanderly0501@gmail.com</a></p>
   </div>
+  <script>
+    function copyEmail() {
+      navigator.clipboard.writeText('wanderly0501@gmail.com').then(function() {
+        var el = document.getElementById('copy-confirm');
+        el.style.display = 'block';
+        setTimeout(function() { el.style.display = 'none'; }, 2500);
+      });
+    }
+  </script>
 </body>
 </html>
