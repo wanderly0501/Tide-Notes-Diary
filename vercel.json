@@ -2,5 +2,8 @@
   "buildCommand": "node node_modules/expo/bin/cli export --platform web && node scripts/add-pwa.js",
   "outputDirectory": "dist",
   "framework": null,
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

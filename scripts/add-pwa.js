@@ -1,9 +1,11 @@
 // Runs after `expo export --platform web`.
 // Adds PWA manifest + apple-touch-icon so the app logo shows
 // when installed to the Android / iOS home screen from the browser.
+// Also copies static pages (privacy policy, etc.) into the dist output.
 const fs = require('fs');
 
 fs.copyFileSync('logo/2.png', 'dist/apple-touch-icon.png');
+fs.copyFileSync('public/privacy.html', 'dist/privacy.html');
 
 fs.writeFileSync('dist/manifest.json', JSON.stringify({
   name: 'Tide',
