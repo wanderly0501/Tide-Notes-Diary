@@ -13,8 +13,11 @@ export function TagsSidebar() {
   const [newName, setNewName] = useState('');
 
   const DOC_COLORS = [
-    '#2fa85a','#16b083','#e8607f','#3d8fd6','#f06fa0',
-    '#e3a417','#9b6fdb','#ee7f43','#15aaa2','#d95f3b','#5b7fd6',
+    '#e8607f','#f06fa0','#d95f3b','#ee7f43','#e3a417',
+    '#2fa85a','#16b083','#15aaa2','#3d8fd6','#5b7fd6',
+    '#9b6fdb','#b06fd6','#6f7fd6','#4a90d6','#2ec4b6',
+    '#f4845f','#c0392b','#8e44ad','#2980b9','#27ae60',
+    '#7f8c8d','#34495e','#e74c3c','#1abc9c',
   ];
   const [colorIdx, setColorIdx] = useState(0);
 
@@ -108,15 +111,13 @@ export function TagsSidebar() {
                 </View>
                 <Text style={s.tagName}>{t.name}</Text>
               </TouchableOpacity>
-              {!t.isPredefined && (
-                <TouchableOpacity
-                  ref={r => { dotRefs.current[t.id] = r; }}
-                  style={s.tagDotBtn}
-                  onPress={() => openCtx(t.id, t.name)}
-                >
-                  <Text style={s.tagDotTxt}>···</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                ref={r => { dotRefs.current[t.id] = r; }}
+                style={s.tagDotBtn}
+                onPress={() => openCtx(t.id, t.name)}
+              >
+                <Text style={s.tagDotTxt}>···</Text>
+              </TouchableOpacity>
             </View>
           );
         })}
