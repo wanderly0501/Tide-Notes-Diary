@@ -158,6 +158,7 @@ export function StreamScreen({
                   onDelete={removeSection}
                   onTogglePin={togglePin}
                   onUpdate={editSection}
+                  onTagsChange={updateSectionTags}
                 />
               ))}
             </View>
