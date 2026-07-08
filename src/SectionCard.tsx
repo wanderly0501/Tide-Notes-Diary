@@ -192,7 +192,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={confirmDelete} style={s.actionBtn}>
-            <Ionicons name="close-outline" size={16} color="#a0a8b8" />
+            <Ionicons name="trash-outline" size={15} color="#a0a8b8" />
           </TouchableOpacity>
         </View>
       </View>

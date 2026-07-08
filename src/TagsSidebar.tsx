@@ -148,7 +148,7 @@ export function TagsSidebar() {
                     <Text style={s.ctxItemTxt}>Rename</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={s.ctxItem} onPress={() => handleDelete(ctxTag.id, ctxTag.name)}>
-                    <Ionicons name="close" size={13} color="#c0392b" />
+                    <Ionicons name="trash-outline" size={13} color="#c0392b" />
                     <Text style={[s.ctxItemTxt, { color: '#c0392b' }]}>Delete</Text>
                   </TouchableOpacity>
                 </>
