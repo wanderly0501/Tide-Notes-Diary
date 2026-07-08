@@ -265,8 +265,21 @@ export function SectionModal({ visible, initial, onClose, onSave }: Props) {
 
 // ── Text block with formatting bar ───────────────────────────────────────────
 
+const WORD_LIMIT = 1000;
+
+function countWords(text: string) {
+  return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+}
+
 function TextBlockEditor({ value, onChange }: { value: string; onChange(v: string): void }) {
   const selRef = useRef({ start: 0, end: 0 });
+  const wordCount = countWords(value);
+  const atLimit = wordCount >= WORD_LIMIT;
+
+  const handleChange = (v: string) => {
+    if (countWords(v) > WORD_LIMIT) return;
+    onChange(v);
+  };
 
   const applyFormat = (marker: string) => {
     const { start, end } = selRef.current;
@@ -303,11 +316,13 @@ function TextBlockEditor({ value, onChange }: { value: string; onChange(v: strin
           <Text style={fb.code}>{ '{ }' }</Text>
         </TouchableOpacity>
       </View>
+      {atLimit && <Text style={s.wordLimitTxt}>Word limit reached (1000)</Text>}
       <TextInput
         style={s.textBlock}
         multiline
+        scrollEnabled={false}
         value={value}
-        onChangeText={onChange}
+        onChangeText={handleChange}
         placeholder="Write something…"
         placeholderTextColor={C.textMuted}
         textAlignVertical="top"
@@ -520,7 +535,8 @@ const s = StyleSheet.create({
   tagDot:        { width: 7, height: 7, borderRadius: 4 },
   tagName:       { fontSize: 13, color: C.textMuted },
   blockWrap:     { marginBottom: S.lg, backgroundColor: C.white, borderRadius: R.md, borderWidth: 1, borderColor: C.borderLight, padding: S.md },
-  textBlock:     { fontSize: 14.5, lineHeight: 23, color: C.textBody, minHeight: 80, outlineWidth: 0 } as any,
+  textBlock:     { fontSize: 14.5, lineHeight: 23, color: C.textBody, outlineWidth: 0 } as any,
+  wordLimitTxt:  { fontSize: 11, color: '#c0392b', marginBottom: 4 },
   removeBlock:   { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end', marginTop: 6, paddingVertical: 4, paddingHorizontal: 8, borderRadius: R.sm },
   removeBlockTxt:{ fontSize: 12, color: '#d32f2f' },
   addRowOuter:   { borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.toolbar, paddingBottom: Platform.OS === 'web' ? 0 : 20 },

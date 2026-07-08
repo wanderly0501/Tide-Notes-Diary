@@ -211,6 +211,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
               key={i}
               style={s.bodyTxt}
               multiline
+              scrollEnabled={false}
               value={block.content}
               onChangeText={v => updateTextBlock(i, v)}
               // @ts-ignore
