@@ -76,16 +76,14 @@ interface Props {
 }
 
 export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags, onToggleFiles, timelineOpen, tagsOpen, filesOpen, onSignOut }: Props) {
-  const { view, setView, searchQuery, setSearchQuery } = useApp();
+  const { view, setView } = useApp();
   const isStream = view === 'stream';
   const isDocs   = view === 'docs' || (typeof view === 'object');
   const isEditor = typeof view === 'object';
-  const [searchOpen, setSearchOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [accountInfoOpen, setAccountInfoOpen] = useState(false);
   const [avatarPos, setAvatarPos] = useState({ top: 0, right: 0 });
   const avatarRef = useRef<View>(null);
-  const inputRef = useRef<TextInput>(null);
 
   const openAccountMenu = () => {
     avatarRef.current?.measureInWindow((x, y, w, h) => {
@@ -93,9 +91,6 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
       setAccountMenuOpen(true);
     });
   };
-
-  const openSearch = () => { setSearchOpen(true); setTimeout(() => inputRef.current?.focus(), 50); };
-  const closeSearch = () => { setSearchOpen(false); setSearchQuery(''); };
 
   if (Platform.OS !== 'web') {
     return (
@@ -168,28 +163,6 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
             <Ionicons name="add" size={16} color="#fff" />
           </TouchableOpacity>
         )}
-        {searchOpen ? (
-          <View style={s.search}>
-            <Ionicons name="search-outline" size={15} color={C.textMuted} />
-            <TextInput
-              ref={inputRef}
-              style={s.searchInput}
-              placeholder="Search…"
-              placeholderTextColor={C.textMuted}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              // @ts-ignore
-              outlineStyle="none"
-            />
-            <TouchableOpacity onPress={closeSearch}>
-              <Ionicons name="close" size={14} color={C.textMuted} />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity style={s.searchBtn} onPress={openSearch} activeOpacity={0.7}>
-            <Ionicons name="search-outline" size={20} color={C.textLabel} />
-          </TouchableOpacity>
-        )}
         <TouchableOpacity ref={avatarRef as any} style={s.avatar} activeOpacity={0.8} onPress={openAccountMenu}>
           <Ionicons name="person-outline" size={14} color="#fff" />
         </TouchableOpacity>
@@ -221,10 +194,9 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
 
 interface BottomBarProps {
   onNew?(): void;
-  onSearch?(): void;
 }
 
-export function MobileBottomBar({ onNew, onSearch }: BottomBarProps) {
+export function MobileBottomBar({ onNew }: BottomBarProps) {
   const { signOut } = useApp();
   const [menuOpen, setMenuOpen]       = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -232,17 +204,7 @@ export function MobileBottomBar({ onNew, onSearch }: BottomBarProps) {
   if (Platform.OS === 'web') return null;
   return (
     <View style={mb.bar}>
-      {/* Left: Search */}
-      <TouchableOpacity style={mb.sideBtn} onPress={onSearch} activeOpacity={0.7}>
-        <Ionicons name="search-outline" size={24} color={C.textLabel} />
-      </TouchableOpacity>
-
-      {/* Center: + New */}
-      <TouchableOpacity style={mb.newBtn} onPress={onNew} activeOpacity={0.8}>
-        <Ionicons name="add" size={24} color="#fff" />
-      </TouchableOpacity>
-
-      {/* Right: Account */}
+      {/* Left: Account */}
       <TouchableOpacity style={mb.sideBtn} activeOpacity={0.8} onPress={() => setMenuOpen(true)}>
         <Ionicons name="person-outline" size={24} color={C.textLabel} />
       </TouchableOpacity>

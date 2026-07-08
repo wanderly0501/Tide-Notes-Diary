@@ -7,7 +7,7 @@ import { supabase } from './src/supabase';
 import { initDB } from './src/db';
 import { AppProvider, useApp } from './src/context';
 import { AuthScreen } from './src/AuthScreen';
-import { Toolbar, MobileBottomBar, MobileSearchBar } from './src/Toolbar';
+import { Toolbar, MobileBottomBar } from './src/Toolbar';
 import { StreamScreen } from './src/StreamScreen';
 import { DocsScreen } from './src/DocsScreen';
 import { EditorScreen } from './src/EditorScreen';
@@ -44,7 +44,6 @@ function TideApp() {
   const [timelineOpen, setTimelineOpen]     = useState(false);
   const [tagsOpen, setTagsOpen]             = useState(false);
   const [filesOpen, setFilesOpen]           = useState(false);
-  const [searchOpen, setSearchOpen]         = useState(false);
 
   const isStream = view === 'stream';
 
@@ -57,21 +56,17 @@ function TideApp() {
     <View style={s.root}>
       <StatusBar style="dark" />
 
-      {isMobile && searchOpen ? (
-        <MobileSearchBar onClose={() => setSearchOpen(false)} />
-      ) : (
-        <Toolbar
-          onNewSection={() => setNewSectionOpen(true)}
-          onNewDoc={() => setNewDocOpen(true)}
-          onToggleTimeline={() => setTimelineOpen(o => !o)}
-          onToggleTags={() => setTagsOpen(o => !o)}
-          onToggleFiles={() => setFilesOpen(o => !o)}
-          timelineOpen={timelineOpen}
-          tagsOpen={tagsOpen}
-          filesOpen={filesOpen}
-          onSignOut={signOut}
-        />
-      )}
+      <Toolbar
+        onNewSection={() => setNewSectionOpen(true)}
+        onNewDoc={() => setNewDocOpen(true)}
+        onToggleTimeline={() => setTimelineOpen(o => !o)}
+        onToggleTags={() => setTagsOpen(o => !o)}
+        onToggleFiles={() => setFilesOpen(o => !o)}
+        timelineOpen={timelineOpen}
+        tagsOpen={tagsOpen}
+        filesOpen={filesOpen}
+        onSignOut={signOut}
+      />
 
       <View style={s.body}>
         {view === 'stream' && (
@@ -96,7 +91,7 @@ function TideApp() {
       </View>
 
       {isMobile && !isEditor && (
-        <MobileBottomBar onNew={handleNew} onSearch={() => setSearchOpen(true)} />
+        <MobileBottomBar onNew={handleNew} />
       )}
     </View>
   );
