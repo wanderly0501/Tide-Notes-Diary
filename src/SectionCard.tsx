@@ -334,7 +334,7 @@ const s = StyleSheet.create({
   pinArrowOn:   { color: '#4a5a7a', fontWeight: '700' as any },
   foldPreview:  { fontSize: 13.5, color: C.textMuted, marginTop: 6, marginBottom: 2 },
   foldBtn:      { alignSelf: 'flex-end', marginTop: 1, paddingBottom: 2, paddingLeft: 4, paddingRight: 0 },
-  bodyTxt:      { fontSize: 14.5, lineHeight: 23, color: C.textBody, marginBottom: 8, outlineWidth: 0 } as any,
+  bodyTxt:      { fontSize: 14.5, lineHeight: 23, color: C.textBody, marginBottom: 8, outlineWidth: 0, ...Platform.select({ web: { resize: 'none' } }) } as any,
   bulletList:   { marginTop: 4, marginBottom: 8, gap: 7 },
   bulletRow:    { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
   bullet:       { width: 6, height: 6, borderRadius: 3, backgroundColor: C.bullet, marginTop: 8, flexShrink: 0 },
