@@ -418,8 +418,8 @@ const s = StyleSheet.create({
   checkTxt:     { fontSize: 14, lineHeight: 22, color: C.textBody },
   checkTxtDone: { color: C.textMuted, textDecorationLine: 'line-through' },
   imgAutoOuter: { width: '100%', marginBottom: 12 },
-  imgAutoWrap:  { width: '100%', backgroundColor: '#e6eaf5', overflow: 'hidden' },
-  imgWrap:      { paddingBottom: '66.666%', overflow: 'hidden', marginBottom: 12, backgroundColor: '#e6eaf5' },
+  imgAutoWrap:  { width: '100%', backgroundColor: C.card, overflow: 'hidden' },
+  imgWrap:      { paddingBottom: '66.666%', overflow: 'hidden', marginBottom: 12, backgroundColor: C.card },
   imgSplitRow:  { flex: 1, flexDirection: 'row' },
   imgHalf:      { flex: 1, overflow: 'hidden' },
 });
