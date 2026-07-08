@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
@@ -271,10 +271,45 @@ function countWords(text: string) {
   return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
 }
 
+// Web-only: native <textarea> that auto-grows with content
+function WebTextArea({ value, onChange, onSel }: {
+  value: string;
+  onChange(v: string): void;
+  onSel(start: number, end: number): void;
+}) {
+  const ref = useRef<any>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = '0px';
+    el.style.height = el.scrollHeight + 'px';
+  }, [value]);
+
+  return React.createElement('textarea', {
+    ref,
+    value,
+    placeholder: 'Write something…',
+    onChange:  (e: any) => onChange(e.target.value),
+    onSelect:  (e: any) => onSel(e.target.selectionStart, e.target.selectionEnd),
+    onInput:   (e: any) => {
+      e.target.style.height = '0px';
+      e.target.style.height = e.target.scrollHeight + 'px';
+    },
+    style: {
+      fontSize: 14.5, lineHeight: '23px', color: C.textBody,
+      width: '100%', resize: 'none', overflow: 'hidden',
+      outline: 'none', border: 'none', background: 'transparent',
+      padding: 0, margin: 0, fontFamily: 'inherit', display: 'block',
+    },
+  });
+}
+
 function TextBlockEditor({ value, onChange }: { value: string; onChange(v: string): void }) {
-  const selRef = useRef({ start: 0, end: 0 });
+  const selRef    = useRef({ start: 0, end: 0 });
+  const [height, setHeight] = useState<number | undefined>(undefined);
   const wordCount = countWords(value);
-  const atLimit = wordCount >= WORD_LIMIT;
+  const atLimit   = wordCount >= WORD_LIMIT;
 
   const handleChange = (v: string) => {
     if (countWords(v) > WORD_LIMIT) return;
@@ -283,58 +318,63 @@ function TextBlockEditor({ value, onChange }: { value: string; onChange(v: strin
 
   const applyFormat = (marker: string) => {
     const { start, end } = selRef.current;
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end);
-    const after = value.slice(end);
-    onChange(before + marker + (selected || '') + marker + after);
+    onChange(value.slice(0, start) + marker + (value.slice(start, end) || '') + marker + value.slice(end));
   };
 
   const insertBullet = () => {
     const { start } = selRef.current;
     const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-    const newVal = value.slice(0, lineStart) + '• ' + value.slice(lineStart);
-    onChange(newVal);
+    onChange(value.slice(0, lineStart) + '• ' + value.slice(lineStart));
   };
+
+  const fmtBar = (
+    <View style={fb.bar}>
+      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('**')}>
+        <Text style={fb.bold}>B</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('*')}>
+        <Text style={fb.italic}>I</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('__')}>
+        <Text style={fb.under}>U</Text>
+      </TouchableOpacity>
+      <View style={fb.sep} />
+      <TouchableOpacity style={fb.btn} onPress={insertBullet}>
+        <Text style={fb.fmtTxt}>• List</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('`')}>
+        <Text style={fb.code}>{ '{ }' }</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View>
-      <View style={fb.bar}>
-        <TouchableOpacity style={fb.btn} onPress={() => applyFormat('**')}>
-          <Text style={fb.bold}>B</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={fb.btn} onPress={() => applyFormat('*')}>
-          <Text style={fb.italic}>I</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={fb.btn} onPress={() => applyFormat('__')}>
-          <Text style={fb.under}>U</Text>
-        </TouchableOpacity>
-        <View style={fb.sep} />
-        <TouchableOpacity style={fb.btn} onPress={insertBullet}>
-          <Text style={fb.fmtTxt}>• List</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={fb.btn} onPress={() => applyFormat('`')}>
-          <Text style={fb.code}>{ '{ }' }</Text>
-        </TouchableOpacity>
-      </View>
+      {fmtBar}
       {atLimit && <Text style={s.wordLimitTxt}>Word limit reached (1000)</Text>}
-      <TextInput
-        style={s.textBlock}
-        multiline
-        scrollEnabled={false}
-        value={value}
-        onChangeText={handleChange}
-        placeholder="Write something…"
-        placeholderTextColor={C.textMuted}
-        textAlignVertical="top"
-        onSelectionChange={e => { selRef.current = e.nativeEvent.selection; }}
-        // @ts-ignore web
-        onInput={Platform.OS === 'web' ? (e: any) => {
-          e.target.style.height = '1px';
-          e.target.style.height = e.target.scrollHeight + 'px';
-        } : undefined}
-        // @ts-ignore
-        outlineStyle="none"
-      />
+      {Platform.OS === 'web' ? (
+        <WebTextArea
+          value={value}
+          onChange={handleChange}
+          onSel={(start, end) => { selRef.current = { start, end }; }}
+        />
+      ) : (
+        <TextInput
+          style={[s.textBlock, height !== undefined ? { height } : undefined]}
+          multiline
+          scrollEnabled={false}
+          value={value}
+          onChangeText={handleChange}
+          placeholder="Write something…"
+          placeholderTextColor={C.textMuted}
+          textAlignVertical="top"
+          onSelectionChange={e => { selRef.current = e.nativeEvent.selection; }}
+          onContentSizeChange={e => {
+            const h = e.nativeEvent.contentSize.height;
+            if (h > 0) setHeight(h);
+          }}
+        />
+      )}
     </View>
   );
 }
@@ -540,7 +580,7 @@ const s = StyleSheet.create({
   tagDot:        { width: 7, height: 7, borderRadius: 4 },
   tagName:       { fontSize: 13, color: C.textMuted },
   blockWrap:     { marginBottom: S.lg, backgroundColor: C.white, borderRadius: R.md, borderWidth: 1, borderColor: C.borderLight, padding: S.md },
-  textBlock:     { fontSize: 14.5, lineHeight: 23, color: C.textBody, outlineWidth: 0, ...Platform.select({ web: { resize: 'none', overflow: 'hidden' } }) } as any,
+  textBlock:     { fontSize: 14.5, lineHeight: 23, color: C.textBody, ...Platform.select({ web: { resize: 'none', outline: 'none' } as any }) } as any,
   wordLimitTxt:  { fontSize: 11, color: '#c0392b', marginBottom: 4 },
   removeBlock:   { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end', marginTop: 6, paddingVertical: 4, paddingHorizontal: 8, borderRadius: R.sm },
   removeBlockTxt:{ fontSize: 12, color: '#d32f2f' },
