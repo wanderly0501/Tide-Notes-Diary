@@ -107,9 +107,20 @@ function AutoFitImage({ uri, onPress }: { uri: string; onPress?(): void }) {
     }, () => {});
   }, [uri]);
 
+  // Box is at most 3:2 tall (max height = 2/3 of width).
+  // Portrait images fill the full box height; their width is narrower — left-aligned via left:0.
+  // Landscape images wider than 3:2 get a shorter box matching their natural ratio.
+  const boxAspect = Math.max(aspect, 1.5);
+
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={s.imgAutoWrap}>
-      <Image source={{ uri }} style={[s.imgAutoImg, { aspectRatio: aspect }]} resizeMode="cover" />
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={s.imgAutoOuter}>
+      <View style={[s.imgAutoWrap, { aspectRatio: boxAspect }]}>
+        <Image
+          source={{ uri }}
+          style={{ position: 'absolute', top: 0, bottom: 0, left: 0, aspectRatio: aspect }}
+          resizeMode="cover"
+        />
+      </View>
     </TouchableOpacity>
   );
 }
@@ -406,8 +417,8 @@ const s = StyleSheet.create({
   checkTick:    { fontSize: 10, color: C.white, fontWeight: '700' },
   checkTxt:     { fontSize: 14, lineHeight: 22, color: C.textBody },
   checkTxtDone: { color: C.textMuted, textDecorationLine: 'line-through' },
-  imgAutoWrap:  { width: '100%', marginBottom: 12, backgroundColor: '#e6eaf5', overflow: 'hidden' },
-  imgAutoImg:   { width: '100%' },
+  imgAutoOuter: { width: '100%', marginBottom: 12 },
+  imgAutoWrap:  { width: '100%', backgroundColor: '#e6eaf5', overflow: 'hidden' },
   imgWrap:      { paddingBottom: '66.666%', overflow: 'hidden', marginBottom: 12, backgroundColor: '#e6eaf5' },
   imgSplitRow:  { flex: 1, flexDirection: 'row' },
   imgHalf:      { flex: 1, overflow: 'hidden' },
