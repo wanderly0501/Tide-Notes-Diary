@@ -329,7 +329,7 @@ function TextBlockEditor({ value, onChange }: { value: string; onChange(v: strin
         onSelectionChange={e => { selRef.current = e.nativeEvent.selection; }}
         // @ts-ignore web
         onInput={Platform.OS === 'web' ? (e: any) => {
-          e.target.style.height = 'auto';
+          e.target.style.height = '1px';
           e.target.style.height = e.target.scrollHeight + 'px';
         } : undefined}
         // @ts-ignore
@@ -540,7 +540,7 @@ const s = StyleSheet.create({
   tagDot:        { width: 7, height: 7, borderRadius: 4 },
   tagName:       { fontSize: 13, color: C.textMuted },
   blockWrap:     { marginBottom: S.lg, backgroundColor: C.white, borderRadius: R.md, borderWidth: 1, borderColor: C.borderLight, padding: S.md },
-  textBlock:     { fontSize: 14.5, lineHeight: 23, color: C.textBody, outlineWidth: 0, ...Platform.select({ web: { resize: 'none' } }) } as any,
+  textBlock:     { fontSize: 14.5, lineHeight: 23, color: C.textBody, outlineWidth: 0, ...Platform.select({ web: { resize: 'none', overflow: 'hidden' } }) } as any,
   wordLimitTxt:  { fontSize: 11, color: '#c0392b', marginBottom: 4 },
   removeBlock:   { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end', marginTop: 6, paddingVertical: 4, paddingHorizontal: 8, borderRadius: R.sm },
   removeBlockTxt:{ fontSize: 12, color: '#d32f2f' },
