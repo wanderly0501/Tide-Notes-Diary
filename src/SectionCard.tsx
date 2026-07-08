@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, Image, TextInput, TouchableOpacity, StyleSheet,
-  Alert, Platform, Modal, Pressable, ScrollView, Dimensions,
+  Alert, Platform, Modal, Pressable, ScrollView, Dimensions, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { C, R } from './theme';
@@ -9,13 +9,14 @@ import { Section, Block, CheckboxBlock, BulletsBlock } from './types';
 import { formatDateDisplay } from './utils';
 import { useApp } from './context';
 
-// Renders inline markdown: **bold**, *italic*, __underline__, `code`
+// Renders inline markdown + auto-linked URLs
 function MarkdownText({ text, style }: { text: string; style?: any }) {
-  const patterns = [
+  const patterns: Array<{ re: RegExp; st: object; link?: boolean }> = [
     { re: /\*\*(.+?)\*\*/s, st: { fontWeight: '700' as const } },
     { re: /\*(.+?)\*/s,     st: { fontStyle: 'italic' as const } },
     { re: /__(.+?)__/s,     st: { textDecorationLine: 'underline' as const } },
     { re: /`(.+?)`/s,       st: { fontFamily: Platform.OS === 'web' ? 'ui-monospace, monospace' : 'monospace' } },
+    { re: /(https?:\/\/[^\s]+)/, st: { color: C.buttonBlue, textDecorationLine: 'underline' as const }, link: true },
   ];
 
   const parts: React.ReactNode[] = [];
@@ -23,11 +24,11 @@ function MarkdownText({ text, style }: { text: string; style?: any }) {
   let key = 0;
 
   while (remaining.length > 0) {
-    let earliest: { index: number; match: RegExpExecArray; st: object } | null = null;
-    for (const { re, st } of patterns) {
+    let earliest: { index: number; match: RegExpExecArray; st: object; link?: boolean } | null = null;
+    for (const { re, st, link } of patterns) {
       const m = re.exec(remaining);
       if (m && (earliest === null || m.index < earliest.index)) {
-        earliest = { index: m.index, match: m, st };
+        earliest = { index: m.index, match: m, st, link };
       }
     }
     if (!earliest) {
@@ -37,7 +38,16 @@ function MarkdownText({ text, style }: { text: string; style?: any }) {
     if (earliest.index > 0) {
       parts.push(<Text key={key++} style={style}>{remaining.slice(0, earliest.index)}</Text>);
     }
-    parts.push(<Text key={key++} style={[style, earliest.st]}>{earliest.match[1]}</Text>);
+    const inner = earliest.match[1] ?? earliest.match[0];
+    if (earliest.link) {
+      const url = inner;
+      const linkProps: any = Platform.OS === 'web'
+        ? { accessibilityRole: 'link', href: url, target: '_blank' }
+        : { onPress: () => Linking.openURL(url) };
+      parts.push(<Text key={key++} style={[style, earliest.st]} {...linkProps}>{url}</Text>);
+    } else {
+      parts.push(<Text key={key++} style={[style, earliest.st]}>{inner}</Text>);
+    }
     remaining = remaining.slice(earliest.index + earliest.match[0].length);
   }
 
