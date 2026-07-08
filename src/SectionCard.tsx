@@ -59,7 +59,6 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
   const [localTags, setLocalTags]     = useState(section.tags);
   const [tagMenuOpen, setTagMenuOpen] = useState(false);
   const [viewerUri, setViewerUri]     = useState<string | null>(null);
-  const [blockHeights, setBlockHeights] = useState<Record<number, number>>({});
   const [tagMenuPos, setTagMenuPos]   = useState({ top: 0, left: 0 });
   const addTagBtnRef = useRef<TouchableOpacity>(null);
 
@@ -210,12 +209,16 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
           return (
             <TextInput
               key={i}
-              style={[s.bodyTxt, blockHeights[i] !== undefined && { height: blockHeights[i] }]}
+              style={s.bodyTxt}
               multiline
               scrollEnabled={false}
               value={block.content}
               onChangeText={v => updateTextBlock(i, v)}
-              onContentSizeChange={e => setBlockHeights(h => ({ ...h, [i]: e.nativeEvent.contentSize.height }))}
+              // @ts-ignore web
+              onInput={Platform.OS === 'web' ? (e: any) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              } : undefined}
               // @ts-ignore
               outlineStyle="none"
             />
