@@ -300,7 +300,8 @@ function WebTextArea({ value, onChange, onSel }: {
       fontSize: 14.5, lineHeight: '23px', color: C.textBody,
       width: '100%', resize: 'none', overflow: 'hidden',
       outline: 'none', border: 'none', background: 'transparent',
-      padding: 0, margin: 0, fontFamily: 'inherit', display: 'block',
+      padding: 0, margin: 0, display: 'block',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     },
   });
 }
