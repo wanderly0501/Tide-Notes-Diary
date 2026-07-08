@@ -9,6 +9,41 @@ import { Section, Block, CheckboxBlock, BulletsBlock } from './types';
 import { formatDateDisplay } from './utils';
 import { useApp } from './context';
 
+// Renders inline markdown: **bold**, *italic*, __underline__, `code`
+function MarkdownText({ text, style }: { text: string; style?: any }) {
+  const patterns = [
+    { re: /\*\*(.+?)\*\*/s, st: { fontWeight: '700' as const } },
+    { re: /\*(.+?)\*/s,     st: { fontStyle: 'italic' as const } },
+    { re: /__(.+?)__/s,     st: { textDecorationLine: 'underline' as const } },
+    { re: /`(.+?)`/s,       st: { fontFamily: Platform.OS === 'web' ? 'ui-monospace, monospace' : 'monospace' } },
+  ];
+
+  const parts: React.ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+
+  while (remaining.length > 0) {
+    let earliest: { index: number; match: RegExpExecArray; st: object } | null = null;
+    for (const { re, st } of patterns) {
+      const m = re.exec(remaining);
+      if (m && (earliest === null || m.index < earliest.index)) {
+        earliest = { index: m.index, match: m, st };
+      }
+    }
+    if (!earliest) {
+      parts.push(<Text key={key++} style={style}>{remaining}</Text>);
+      break;
+    }
+    if (earliest.index > 0) {
+      parts.push(<Text key={key++} style={style}>{remaining.slice(0, earliest.index)}</Text>);
+    }
+    parts.push(<Text key={key++} style={[style, earliest.st]}>{earliest.match[1]}</Text>);
+    remaining = remaining.slice(earliest.index + earliest.match[0].length);
+  }
+
+  return <Text style={style}>{parts}</Text>;
+}
+
 interface Props {
   section: Section;
   onEdit(s: Section): void;
@@ -208,7 +243,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
       {!folded && localBlocks.map((block, i) => {
         if (block.type === 'text') {
           return (
-            <Text key={i} style={s.bodyTxt}>{block.content}</Text>
+            <MarkdownText key={i} text={block.content} style={s.bodyTxt} />
           );
         }
 

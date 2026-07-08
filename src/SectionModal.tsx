@@ -286,12 +286,17 @@ function WebTextArea({ value, onChange, onSel }: {
     el.style.height = el.scrollHeight + 'px';
   }, [value]);
 
+  const saveSelection = (e: any) => onSel(e.target.selectionStart, e.target.selectionEnd);
+
   return React.createElement('textarea', {
     ref,
     value,
     placeholder: 'Write something…',
     onChange:  (e: any) => onChange(e.target.value),
-    onSelect:  (e: any) => onSel(e.target.selectionStart, e.target.selectionEnd),
+    onSelect:  saveSelection,
+    onKeyUp:   saveSelection,
+    onClick:   saveSelection,
+    onBlur:    saveSelection,  // capture before focus moves to format button
     onInput:   (e: any) => {
       e.target.style.height = '0px';
       e.target.style.height = e.target.scrollHeight + 'px';
