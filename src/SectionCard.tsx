@@ -98,6 +98,22 @@ const iv = StyleSheet.create({
 });
 
 
+function AutoFitImage({ uri, onPress }: { uri: string; onPress?(): void }) {
+  const [aspect, setAspect] = useState<number>(1.5);
+
+  useEffect(() => {
+    Image.getSize(uri, (w, h) => {
+      if (w > 0 && h > 0) setAspect(w / h);
+    }, () => {});
+  }, [uri]);
+
+  return (
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={s.imgAutoWrap}>
+      <Image source={{ uri }} style={[s.imgAutoImg, { aspectRatio: aspect }]} resizeMode="cover" />
+    </TouchableOpacity>
+  );
+}
+
 export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, onTagsChange }: Props) {
   const { tags: allTags } = useApp();
   const [folded, setFolded]           = useState(false);
@@ -297,23 +313,34 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
         }
 
         if (block.type === 'image') {
+          if (block.layout !== 'split') {
+            return block.uri ? (
+              <AutoFitImage key={i} uri={block.uri} onPress={() => setViewerUri(block.uri!)} />
+            ) : null;
+          }
           return (
             <View key={i} style={s.imgWrap}>
               <View style={StyleSheet.absoluteFill}>
-                {block.layout === 'split' ? (
-                  <View style={s.imgSplitRow}>
-                    <TouchableOpacity style={s.imgHalf} activeOpacity={0.9} onPress={() => block.uri && setViewerUri(block.uri)}>
-                      {block.uri ? <Image source={{ uri: block.uri }} style={StyleSheet.absoluteFill} resizeMode="cover" /> : null}
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[s.imgHalf, { borderLeftWidth: 6, borderLeftColor: '#fff' }]} activeOpacity={0.9} onPress={() => block.uri2 && setViewerUri(block.uri2)}>
-                      {block.uri2 ? <Image source={{ uri: block.uri2 }} style={StyleSheet.absoluteFill} resizeMode="cover" /> : null}
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={0.9} onPress={() => block.uri && setViewerUri(block.uri)}>
-                    {block.uri ? <Image source={{ uri: block.uri }} style={StyleSheet.absoluteFill} resizeMode="cover" /> : null}
+                <View style={s.imgSplitRow}>
+                  <TouchableOpacity style={s.imgHalf} activeOpacity={0.9} onPress={() => block.uri && setViewerUri(block.uri)}>
+                    {block.uri ? (
+                      <Image
+                        source={{ uri: block.uri }}
+                        style={[StyleSheet.absoluteFill, Platform.select({ web: { objectFit: 'contain', objectPosition: 'left center' } as any })]}
+                        resizeMode="contain"
+                      />
+                    ) : null}
                   </TouchableOpacity>
-                )}
+                  <TouchableOpacity style={[s.imgHalf, { borderLeftWidth: 6, borderLeftColor: '#fff' }]} activeOpacity={0.9} onPress={() => block.uri2 && setViewerUri(block.uri2)}>
+                    {block.uri2 ? (
+                      <Image
+                        source={{ uri: block.uri2 }}
+                        style={[StyleSheet.absoluteFill, Platform.select({ web: { objectFit: 'contain', objectPosition: 'left center' } as any })]}
+                        resizeMode="contain"
+                      />
+                    ) : null}
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
           );
@@ -379,6 +406,8 @@ const s = StyleSheet.create({
   checkTick:    { fontSize: 10, color: C.white, fontWeight: '700' },
   checkTxt:     { fontSize: 14, lineHeight: 22, color: C.textBody },
   checkTxtDone: { color: C.textMuted, textDecorationLine: 'line-through' },
+  imgAutoWrap:  { width: '100%', marginBottom: 12, backgroundColor: '#e6eaf5', overflow: 'hidden' },
+  imgAutoImg:   { width: '100%' },
   imgWrap:      { paddingBottom: '66.666%', overflow: 'hidden', marginBottom: 12, backgroundColor: '#e6eaf5' },
   imgSplitRow:  { flex: 1, flexDirection: 'row' },
   imgHalf:      { flex: 1, overflow: 'hidden' },
