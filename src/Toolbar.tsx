@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, Image, StatusBar, Modal, Pressable } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, Image, StatusBar, Modal, Pressable, Linking } from 'react-native';
+
+const PRIVACY_URL = Platform.OS === 'web' ? '/privacy' : 'https://tide-notes-diary.vercel.app/privacy';
 import { Ionicons } from '@expo/vector-icons';
 
 const STATUS_BAR_HEIGHT = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0;
@@ -178,6 +180,9 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
           <TouchableOpacity style={s.accountMenuItem} onPress={() => setAccountMenuOpen(false)}>
             <Text style={s.accountMenuTxt}>Settings</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={s.accountMenuItem} onPress={() => { setAccountMenuOpen(false); Linking.openURL(PRIVACY_URL); }}>
+            <Text style={s.accountMenuTxt}>Privacy Policy</Text>
+          </TouchableOpacity>
           <View style={s.accountMenuDivider} />
           <TouchableOpacity style={s.accountMenuItem} onPress={() => { setAccountMenuOpen(false); onSignOut?.(); }}>
             <Text style={[s.accountMenuTxt, s.accountMenuSignOut]}>Log out</Text>
@@ -219,6 +224,9 @@ export function MobileBottomBar({ onNew }: BottomBarProps) {
           </TouchableOpacity>
           <TouchableOpacity style={mb.sheetItem} onPress={() => setMenuOpen(false)}>
             <Text style={mb.sheetTxt}>Settings</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={mb.sheetItem} onPress={() => { setMenuOpen(false); Linking.openURL(PRIVACY_URL); }}>
+            <Text style={mb.sheetTxt}>Privacy Policy</Text>
           </TouchableOpacity>
           <View style={mb.sheetDivider} />
           <TouchableOpacity style={mb.sheetItem} onPress={() => { setMenuOpen(false); signOut(); }}>
