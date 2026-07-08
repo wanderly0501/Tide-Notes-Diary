@@ -11,11 +11,14 @@ import { useApp } from './context';
 
 // Renders inline markdown + auto-linked URLs
 function MarkdownText({ text, style }: { text: string; style?: any }) {
+  // Flatten to a plain object so nested Text style overrides apply correctly on native
+  const flat: any = StyleSheet.flatten(style) || {};
+
   const patterns: Array<{ re: RegExp; st: object; link?: boolean }> = [
-    { re: /\*\*(.+?)\*\*/s, st: { fontWeight: '700' as const } },
-    { re: /\*(.+?)\*/s,     st: { fontStyle: 'italic' as const } },
-    { re: /__(.+?)__/s,     st: { textDecorationLine: 'underline' as const } },
-    { re: /`(.+?)`/s,       st: { fontFamily: Platform.OS === 'web' ? 'ui-monospace, monospace' : 'monospace' } },
+    { re: /\*\*(.+?)\*\*/, st: { fontWeight: '700' as const } },
+    { re: /\*(.+?)\*/,     st: { fontStyle: 'italic' as const } },
+    { re: /__(.+?)__/,     st: { textDecorationLine: 'underline' as const } },
+    { re: /`(.+?)`/,       st: { fontFamily: Platform.OS === 'web' ? 'ui-monospace, monospace' : 'monospace' } },
     { re: /(https?:\/\/[^\s]+)/, st: { color: C.buttonBlue, textDecorationLine: 'underline' as const }, link: true },
   ];
 
@@ -32,26 +35,27 @@ function MarkdownText({ text, style }: { text: string; style?: any }) {
       }
     }
     if (!earliest) {
-      parts.push(<Text key={key++} style={style}>{remaining}</Text>);
+      parts.push(<Text key={key++} style={flat}>{remaining}</Text>);
       break;
     }
     if (earliest.index > 0) {
-      parts.push(<Text key={key++} style={style}>{remaining.slice(0, earliest.index)}</Text>);
+      parts.push(<Text key={key++} style={flat}>{remaining.slice(0, earliest.index)}</Text>);
     }
     const inner = earliest.match[1] ?? earliest.match[0];
+    const innerStyle = { ...flat, ...earliest.st };
     if (earliest.link) {
       const url = inner;
       const linkProps: any = Platform.OS === 'web'
         ? { accessibilityRole: 'link', href: url, target: '_blank' }
         : { onPress: () => Linking.openURL(url) };
-      parts.push(<Text key={key++} style={[style, earliest.st]} {...linkProps}>{url}</Text>);
+      parts.push(<Text key={key++} style={innerStyle} {...linkProps}>{url}</Text>);
     } else {
-      parts.push(<Text key={key++} style={[style, earliest.st]}>{inner}</Text>);
+      parts.push(<Text key={key++} style={innerStyle}>{inner}</Text>);
     }
     remaining = remaining.slice(earliest.index + earliest.match[0].length);
   }
 
-  return <Text style={style}>{parts}</Text>;
+  return <Text style={flat}>{parts}</Text>;
 }
 
 interface Props {
