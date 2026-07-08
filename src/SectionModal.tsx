@@ -273,6 +273,7 @@ function countWords(text: string) {
 
 function TextBlockEditor({ value, onChange }: { value: string; onChange(v: string): void }) {
   const selRef = useRef({ start: 0, end: 0 });
+  const [height, setHeight] = useState<number | undefined>(undefined);
   const wordCount = countWords(value);
   const atLimit = wordCount >= WORD_LIMIT;
 
@@ -318,7 +319,7 @@ function TextBlockEditor({ value, onChange }: { value: string; onChange(v: strin
       </View>
       {atLimit && <Text style={s.wordLimitTxt}>Word limit reached (1000)</Text>}
       <TextInput
-        style={s.textBlock}
+        style={[s.textBlock, height !== undefined && { height }]}
         multiline
         scrollEnabled={false}
         value={value}
@@ -326,6 +327,7 @@ function TextBlockEditor({ value, onChange }: { value: string; onChange(v: strin
         placeholder="Write something…"
         placeholderTextColor={C.textMuted}
         textAlignVertical="top"
+        onContentSizeChange={e => setHeight(e.nativeEvent.contentSize.height)}
         onSelectionChange={e => { selRef.current = e.nativeEvent.selection; }}
         // @ts-ignore
         outlineStyle="none"
