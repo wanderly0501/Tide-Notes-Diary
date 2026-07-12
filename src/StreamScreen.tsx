@@ -3,7 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform, RefreshControl,
 } from 'react-native';
-import { C, S } from './theme';
+import { S } from './theme';
+import { useTheme } from './ThemeContext';
 import { useApp } from './context';
 import { TimelineSidebar } from './TimelineSidebar';
 import { TagsSidebar } from './TagsSidebar';
@@ -28,6 +29,7 @@ export function StreamScreen({
   onMobileTagsClose?: () => void;
 }) {
   const { filteredSections, addSection, editSection, removeSection, togglePin, updateSectionTags, reload } = useApp();
+  const { C } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
   const dateOffsets = useRef<Record<string, number>>({});
 
@@ -90,7 +92,7 @@ export function StreamScreen({
 
       <ScrollView
         ref={scrollRef}
-        style={[st.scroll, isMobile && StyleSheet.absoluteFillObject]}
+        style={[{ flex: 1, backgroundColor: C.bg }, isMobile && StyleSheet.absoluteFillObject]}
         contentContainerStyle={st.content}
         showsVerticalScrollIndicator={false}
         refreshControl={isMobile ? (
@@ -142,11 +144,11 @@ export function StreamScreen({
             <View key={date} onLayout={e => { dateOffsets.current[date] = e.nativeEvent.layout.y; }}>
               {/* Date divider */}
               <View style={st.divider}>
-                <Text style={[st.dividerLabel, isToday && st.dividerLabelToday]}>
+                <Text style={[st.dividerLabel, { color: isToday ? C.todayText : C.textLabel }]}>
                   {label}
                 </Text>
-                {isToday && <Text style={st.dividerYear}>{year}</Text>}
-                <View style={[st.dividerLine, { backgroundColor: '#d0d5e2', height: 1 }]} />
+                {isToday && <Text style={{ fontSize: 11, color: C.textMuted, fontWeight: '500' }}>{year}</Text>}
+                <View style={[st.dividerLine, { backgroundColor: C.border }]} />
               </View>
 
               {/* Sections */}
@@ -167,8 +169,8 @@ export function StreamScreen({
 
         {pinned.length === 0 && groups.length === 0 && (
           <View style={st.empty}>
-            <Text style={st.emptyTitle}>No notes yet</Text>
-            <Text style={st.emptyBody}>Tap the composer above to add your first section.</Text>
+            <Text style={{ fontSize: 18, fontWeight: '600', color: C.text, marginBottom: 8 }}>No notes yet</Text>
+            <Text style={{ fontSize: 14, color: C.textMuted, textAlign: 'center' }}>Tap the composer above to add your first section.</Text>
           </View>
         )}
       </ScrollView>
@@ -188,20 +190,12 @@ export function StreamScreen({
 }
 
 const st = StyleSheet.create({
-  container:   { flex: 1, flexDirection: 'row' },
-  scroll:      { flex: 1, backgroundColor: C.bg },
-  content:     { maxWidth: 760, alignSelf: 'center', width: '100%', paddingHorizontal: Platform.OS === 'web' ? 40 : 16, paddingTop: Platform.OS === 'web' ? 26 : 14, paddingBottom: Platform.OS === 'web' ? 80 : 40 },
-  pinnedHeader:  { marginTop: 4, marginBottom: 10, marginHorizontal: 2 },
-  pinnedLabel:   { color: '#b03030' },
+  container:     { flex: 1, flexDirection: 'row' },
+  content:       { maxWidth: 760, alignSelf: 'center', width: '100%', paddingHorizontal: Platform.OS === 'web' ? 40 : 16, paddingTop: Platform.OS === 'web' ? 26 : 14, paddingBottom: Platform.OS === 'web' ? 80 : 40 },
   reminderHeader:{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, marginBottom: 10, marginHorizontal: 2 },
-  reminderIcon:  { fontSize: 13 },
   reminderLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 1, color: '#c07000', textTransform: 'uppercase' as const },
-  divider:     { flexDirection: 'row', alignItems: 'center', gap: 13, marginTop: 24, marginBottom: 14, marginHorizontal: 2 },
-  dividerLabel:{ fontSize: 11, fontWeight: '700', letterSpacing: 1, color: '#6f7588', textTransform: 'uppercase' as const },
-  dividerLabelToday: { color: C.todayText },
-  dividerYear: { fontSize: 11, color: '#a6adbf', fontWeight: '500' },
-  dividerLine: { flex: 1 },
-  empty:       { alignItems: 'center', paddingTop: 60 },
-  emptyTitle:  { fontSize: 18, fontWeight: '600', color: C.text, marginBottom: 8 },
-  emptyBody:   { fontSize: 14, color: C.textMuted, textAlign: 'center' },
+  divider:       { flexDirection: 'row', alignItems: 'center', gap: 13, marginTop: 24, marginBottom: 14, marginHorizontal: 2 },
+  dividerLabel:  { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' as const },
+  dividerLine:   { flex: 1, height: 1 },
+  empty:         { alignItems: 'center', paddingTop: 60 },
 });

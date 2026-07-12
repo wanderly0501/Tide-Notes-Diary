@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { C, R, S } from './theme';
+import { R, S, ColorsType } from './theme';
+import { useTheme } from './ThemeContext';
 import { useApp } from './context';
 import { formatMonthLabel, todayISO } from './utils';
 
@@ -11,6 +12,8 @@ interface Props {
 
 export function TimelineSidebar({ onDatePress }: Props) {
   const { sections } = useApp();
+  const { C } = useTheme();
+  const s = useMemo(() => makeStyles(C), [C]);
   const [open, setOpen] = useState(true);
   const today = todayISO();
 
@@ -76,7 +79,7 @@ export function TimelineSidebar({ onDatePress }: Props) {
                 >
                   <View style={[s.dayBar, { backgroundColor: isToday ? C.pinkBar : 'transparent' }]} />
                   <View>
-                    <Text style={[s.dayNum, { fontWeight: isToday ? '700' : '500', color: isToday ? '#1f2742' : '#383d4b' }]}>
+                    <Text style={[s.dayNum, { fontWeight: isToday ? '700' : '500', color: isToday ? C.todayText : C.textBody }]}>
                       {parseInt(day, 10)}
                     </Text>
                     <Text style={s.dayWd}>{isToday ? wd + ' · Today' : wd}</Text>
@@ -95,45 +98,33 @@ export function TimelineSidebar({ onDatePress }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  sidebar: {
-    width: 160, flexShrink: 0, backgroundColor: C.sidebarBg, flexDirection: 'column',
-    ...Platform.OS === 'web'
-      ? { borderRightWidth: 1, borderRightColor: C.border }
-      : { position: 'absolute' as const, right: 0, top: 0, bottom: 0, borderLeftWidth: 1, borderLeftColor: C.border, zIndex: 20 },
-  },
-  sidebarClosed: { width: 56, alignItems: 'center', paddingTop: 14, gap: 12 },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: S.lg, paddingTop: S.lg, paddingBottom: S.sm,
-  },
-  headerTxt: { fontSize: 11, fontWeight: '600', letterSpacing: 1, color: C.textLabel },
-  chevronBtn: {
-    width: 24, height: 24, borderRadius: R.sm, alignItems: 'center', justifyContent: 'center',
-  },
-  chevron: { fontSize: 18, color: C.textMuted },
-  collapseBtn: {
-    width: 30, height: 30, borderRadius: R.md, backgroundColor: C.primaryLight,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  collapseIcon: { fontSize: 16 },
-  scroll: { flex: 1, paddingHorizontal: 10 },
-  monthLabel: {
-    fontSize: 11, fontWeight: '600', letterSpacing: 0.6, color: '#a6adbf',
-    paddingVertical: S.sm, paddingHorizontal: S.sm,
-  },
-  dayRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 11,
-    paddingVertical: 7, paddingHorizontal: 10, borderRadius: R.md,
-    marginBottom: 2,
-  },
-  dayRowToday: { backgroundColor: C.today },
-  dayBar: { width: 3, height: 26, borderRadius: 3 },
-  dayNum: { fontSize: 13.5, lineHeight: 16 },
-  dayWd:  { fontSize: 11, color: '#a6adbf' },
-  countBadge:      { marginLeft: 'auto', fontSize: 14, fontWeight: '600', color: C.bullet },
-  countBadgeToday: { color: C.pinkBar },
-  miniCount:       { fontSize: 11, fontWeight: '600', color: C.bullet, textAlign: 'center' },
-  miniCountToday:  { color: C.pinkBar },
-  empty:  { fontSize: 12, color: C.textMuted, textAlign: 'center', marginTop: 24 },
-});
+function makeStyles(C: ColorsType) {
+  return StyleSheet.create({
+    sidebar: {
+      width: 160, flexShrink: 0, backgroundColor: C.sidebarBg, flexDirection: 'column',
+      ...Platform.OS === 'web'
+        ? { borderRightWidth: 1, borderRightColor: C.border }
+        : { position: 'absolute' as const, right: 0, top: 0, bottom: 0, borderLeftWidth: 1, borderLeftColor: C.border, zIndex: 20 },
+    },
+    sidebarClosed: { width: 56, alignItems: 'center', paddingTop: 14, gap: 12 },
+    header: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: S.lg, paddingTop: S.lg, paddingBottom: S.sm,
+    },
+    headerTxt:   { fontSize: 11, fontWeight: '600', letterSpacing: 1, color: C.textLabel },
+    chevronBtn:  { width: 24, height: 24, borderRadius: R.sm, alignItems: 'center', justifyContent: 'center' },
+    collapseBtn: { width: 30, height: 30, borderRadius: R.md, backgroundColor: C.primaryLight, alignItems: 'center', justifyContent: 'center' },
+    scroll:      { flex: 1, paddingHorizontal: 10 },
+    monthLabel:  { fontSize: 11, fontWeight: '600', letterSpacing: 0.6, color: C.textMuted, paddingVertical: S.sm, paddingHorizontal: S.sm },
+    dayRow:      { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 7, paddingHorizontal: 10, borderRadius: R.md, marginBottom: 2 },
+    dayRowToday: { backgroundColor: C.today },
+    dayBar:      { width: 3, height: 26, borderRadius: 3 },
+    dayNum:      { fontSize: 13.5, lineHeight: 16 },
+    dayWd:       { fontSize: 11, color: C.textMuted },
+    countBadge:      { marginLeft: 'auto', fontSize: 14, fontWeight: '600', color: C.bullet },
+    countBadgeToday: { color: C.todayBar },
+    miniCount:       { fontSize: 11, fontWeight: '600', color: C.bullet, textAlign: 'center' },
+    miniCountToday:  { color: C.todayBar },
+    empty:       { fontSize: 12, color: C.textMuted, textAlign: 'center', marginTop: 24 },
+  });
+}

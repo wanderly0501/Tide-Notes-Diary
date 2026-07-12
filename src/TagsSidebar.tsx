@@ -1,13 +1,16 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal, Alert, Pressable, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { C, R, S } from './theme';
+import { R, S, ColorsType } from './theme';
+import { useTheme } from './ThemeContext';
 import { useApp } from './context';
 import { uuid } from './utils';
 
 
 export function TagsSidebar() {
   const { tags, activeTags, toggleTag, deselectAllTags, selectAllTags, addTag, removeTag, renameTag } = useApp();
+  const { C } = useTheme();
+  const s = useMemo(() => makeStyles(C), [C]);
   const [open, setOpen]       = useState(false);
   const [adding, setAdding]   = useState(false);
   const [newName, setNewName] = useState('');
@@ -104,10 +107,10 @@ export function TagsSidebar() {
                 activeOpacity={0.7}
               >
                 <View style={[s.checkbox, {
-                  backgroundColor: checked ? t.color : C.white,
+                  backgroundColor: checked ? t.color : C.surface,
                   borderColor: checked ? t.color : C.border,
                 }]}>
-                  {checked && <Ionicons name="checkmark" size={11} color={C.white} />}
+                  {checked && <Ionicons name="checkmark" size={11} color="#fff" />}
                 </View>
                 <Text style={s.tagName}>{t.name}</Text>
               </TouchableOpacity>
@@ -217,78 +220,58 @@ export function TagsSidebar() {
   );
 }
 
-const s = StyleSheet.create({
-  sidebar: {
-    width: 160, flexShrink: 0, backgroundColor: C.tagsSidebarBg,
-    ...Platform.OS === 'web'
-      ? { borderRightWidth: 1, borderRightColor: C.border }
-      : { position: 'absolute' as const, right: 0, top: 0, bottom: 0, borderLeftWidth: 1, borderLeftColor: C.border, zIndex: 20 },
-  },
-  sidebarClosed: { width: 58, alignItems: 'center', paddingTop: 14, gap: 10 },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: S.lg, paddingTop: S.lg, paddingBottom: S.sm,
-  },
-  headerTxt:   { fontSize: 11, fontWeight: '600', letterSpacing: 1, color: C.textLabel },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  selectRow:   { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  deselectTxt: { fontSize: 11, color: C.buttonBlue },
-  sep:         { fontSize: 11, color: C.textMuted },
-  chevronBtn:  { width: 24, height: 24, borderRadius: R.sm, alignItems: 'center', justifyContent: 'center' },
-  chevron:     { fontSize: 18, color: C.textMuted },
-  collapseBtn: {
-    width: 30, height: 30, borderRadius: R.md, backgroundColor: C.primaryLight,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  tagIcon: { fontSize: 22, fontWeight: '700', color: C.textLabel },
-  scroll: { flex: 1, paddingHorizontal: 10 },
-  tagRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 2, paddingHorizontal: S.sm, borderRadius: R.md, marginBottom: 2,
-  },
-  tagRowMain: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, paddingVertical: 5 },
-  tagDotBtn:  { padding: 4 },
-  tagDotTxt:  { fontSize: 13, color: C.textMuted, letterSpacing: 1 },
-  ctxMenu: {
-    backgroundColor: C.white, borderWidth: 1, borderColor: C.border,
-    borderRadius: R.md, minWidth: 140, zIndex: 9999,
-    shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
-  },
-  ctxItem:        { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 10 },
-  ctxItemTxt:     { fontSize: 13.5, color: C.textBody },
-  ctxRenameRow:   { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10 },
-  ctxRenameInput: { flex: 1, fontSize: 13.5, color: C.text, borderWidth: 1, borderColor: C.border, borderRadius: R.sm, paddingHorizontal: 8, paddingVertical: 4, outlineWidth: 0 } as any,
-  ctxRenameOk:    { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: C.buttonBlue, borderRadius: R.sm },
-  ctxRenameOkTxt: { fontSize: 13, fontWeight: '600', color: C.white },
-  checkbox: {
-    width: 18, height: 18, borderRadius: 5, borderWidth: 1.5,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  check:    { fontSize: 11, color: C.white, fontWeight: '700' },
-  colorDot: { width: 8, height: 8, borderRadius: 4 },
-  tagName:  { fontSize: 13.5, color: C.textBody },
-  miniTagBtn: { alignItems: 'center', paddingVertical: 4 },
-  miniDot: { width: 18, height: 18, borderRadius: 9, borderWidth: 2 },
-  footer: { padding: S.md, borderTopWidth: 1, borderTopColor: C.border },
-  newTagBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: S.sm, padding: S.sm,
-    borderWidth: 1, borderColor: C.border, borderStyle: 'dashed',
-    borderRadius: R.md,
-  },
-  plusIcon: { fontSize: 14, color: C.textLabel },
-  newTagTxt:{ fontSize: 13, color: C.textLabel },
-  addForm:  { gap: 8 },
-  nameInput:{
-    borderWidth: 1, borderColor: C.border, borderRadius: R.sm,
-    padding: S.sm, fontSize: 13, color: C.text, backgroundColor: C.white,
-    outlineWidth: 0,
-  } as any,
-  colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  colorPick:{ width: 18, height: 18, borderRadius: 9 },
-  colorPickSel: { borderWidth: 2, borderColor: C.text },
-  addBtns:  { flexDirection: 'row', gap: 8, justifyContent: 'flex-end' },
-  cancelBtn:{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: R.sm, backgroundColor: C.border },
-  cancelTxt:{ fontSize: 12, color: C.textBody },
-  saveBtn:  { paddingHorizontal: 10, paddingVertical: 5, borderRadius: R.sm, backgroundColor: C.primary },
-  saveTxt:  { fontSize: 12, color: C.white, fontWeight: '600' },
-});
+function makeStyles(C: ColorsType) {
+  return StyleSheet.create({
+    sidebar: {
+      width: 160, flexShrink: 0, backgroundColor: C.tagsSidebarBg,
+      ...Platform.OS === 'web'
+        ? { borderRightWidth: 1, borderRightColor: C.border }
+        : { position: 'absolute' as const, right: 0, top: 0, bottom: 0, borderLeftWidth: 1, borderLeftColor: C.border, zIndex: 20 },
+    },
+    sidebarClosed: { width: 58, alignItems: 'center', paddingTop: 14, gap: 10 },
+    header: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: S.lg, paddingTop: S.lg, paddingBottom: S.sm,
+    },
+    headerTxt:   { fontSize: 11, fontWeight: '600', letterSpacing: 1, color: C.textLabel },
+    selectRow:   { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+    deselectTxt: { fontSize: 11, color: C.buttonBlue },
+    sep:         { fontSize: 11, color: C.textMuted },
+    chevronBtn:  { width: 24, height: 24, borderRadius: R.sm, alignItems: 'center', justifyContent: 'center' },
+    collapseBtn: { width: 30, height: 30, borderRadius: R.md, backgroundColor: C.primaryLight, alignItems: 'center', justifyContent: 'center' },
+    tagIcon: { fontSize: 22, fontWeight: '700', color: C.textLabel },
+    scroll: { flex: 1, paddingHorizontal: 10 },
+    tagRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 2, paddingHorizontal: S.sm, borderRadius: R.md, marginBottom: 2 },
+    tagRowMain: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, paddingVertical: 5 },
+    tagDotBtn:  { padding: 4 },
+    tagDotTxt:  { fontSize: 13, color: C.textMuted, letterSpacing: 1 },
+    ctxMenu: {
+      backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
+      borderRadius: R.md, minWidth: 140, zIndex: 9999,
+      shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8, shadowOffset: { width: 0, height: 4 },
+    },
+    ctxItem:        { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 10 },
+    ctxItemTxt:     { fontSize: 13.5, color: C.textBody },
+    ctxRenameRow:   { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10 },
+    ctxRenameInput: { flex: 1, fontSize: 13.5, color: C.text, borderWidth: 1, borderColor: C.border, borderRadius: R.sm, paddingHorizontal: 8, paddingVertical: 4, outlineWidth: 0 } as any,
+    ctxRenameOk:    { paddingHorizontal: 10, paddingVertical: 5, backgroundColor: C.buttonBlue, borderRadius: R.sm },
+    ctxRenameOkTxt: { fontSize: 13, fontWeight: '600', color: '#fff' },
+    checkbox: { width: 18, height: 18, borderRadius: 5, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+    tagName:  { fontSize: 13.5, color: C.textBody },
+    miniTagBtn: { alignItems: 'center', paddingVertical: 4 },
+    miniDot: { width: 18, height: 18, borderRadius: 9, borderWidth: 2 },
+    footer: { padding: S.md, borderTopWidth: 1, borderTopColor: C.border },
+    newTagBtn: { flexDirection: 'row', alignItems: 'center', gap: S.sm, padding: S.sm, borderWidth: 1, borderColor: C.border, borderStyle: 'dashed', borderRadius: R.md },
+    newTagTxt:{ fontSize: 13, color: C.textLabel },
+    addForm:  { gap: 8 },
+    nameInput:{ borderWidth: 1, borderColor: C.border, borderRadius: R.sm, padding: S.sm, fontSize: 13, color: C.text, backgroundColor: C.surface, outlineWidth: 0 } as any,
+    colorRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    colorPick:{ width: 18, height: 18, borderRadius: 9 },
+    colorPickSel: { borderWidth: 2, borderColor: C.text },
+    addBtns:  { flexDirection: 'row', gap: 8, justifyContent: 'flex-end' },
+    cancelBtn:{ paddingHorizontal: 10, paddingVertical: 5, borderRadius: R.sm, backgroundColor: C.border },
+    cancelTxt:{ fontSize: 12, color: C.textBody },
+    saveBtn:  { paddingHorizontal: 10, paddingVertical: 5, borderRadius: R.sm, backgroundColor: C.primary },
+    saveTxt:  { fontSize: 12, color: '#fff', fontWeight: '600' },
+  });
+}

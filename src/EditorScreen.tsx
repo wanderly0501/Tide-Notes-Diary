@@ -3,7 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Platform,
 } from 'react-native';
-import { C, R, S } from './theme';
+import { R, S, ColorsType } from './theme';
+import { useTheme } from './ThemeContext';
 import { useApp } from './context';
 import { TideDocument } from './types';
 import { nowISO, countWords } from './utils';
@@ -143,6 +144,8 @@ const FONT_SIZES = [
 
 export function EditorScreen({ docId }: Props) {
   const { setView, getDoc, editDoc } = useApp();
+  const { C } = useTheme();
+  const s = useMemo(() => makeStyles(C), [C]);
 
   const [doc, setDoc]       = useState<TideDocument | null>(null);
   const [title, setTitle]   = useState('');
@@ -666,82 +669,80 @@ export function EditorScreen({ docId }: Props) {
   );
 }
 
-const s = StyleSheet.create({
-  wrap:         { flex: 1 },
-  subBar:       {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    padding: 11, paddingHorizontal: 22, backgroundColor: C.toolbar,
-    borderBottomWidth: 1, borderBottomColor: '#e1e5f1',
-  },
-  subLeft:      { flexDirection: 'row', alignItems: 'center', gap: 13, flex: 1 },
-  subRight:     { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  backBtn:      { width: 32, height: 32, borderRadius: R.md, backgroundColor: C.primaryLight, alignItems: 'center', justifyContent: 'center' },
-  backChevron:  { fontSize: 20, color: C.primary, fontWeight: '600' },
-  barDiv:       { width: 1, height: 18, backgroundColor: C.border, marginHorizontal: 2 },
-  docInfo:      { flex: 1 },
-  docInfoRow:   { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dot:          { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
-  docTitle:       { fontSize: 16, fontWeight: '600', color: C.text, flex: 1, outlineWidth: 0 } as any,
-  docTitleInline: { fontSize: 14, fontWeight: '600', color: C.text, minWidth: 80, maxWidth: 200, outlineWidth: 0 } as any,
-  docMeta:      { fontSize: 12, color: C.textMuted },
-  savedBadge:   { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
-  savedIcon:    { fontSize: 13, color: C.success, fontWeight: '700' },
-  savedTxt:     { fontSize: 12.5, color: C.success },
-  // Web format bar
-  fmtBar:       {
-    flexDirection: 'row', alignItems: 'center', gap: 3, flexWrap: 'wrap',
-    paddingVertical: 6, paddingHorizontal: 16,
-    borderBottomWidth: 1, borderBottomColor: '#e1e5f1', backgroundColor: C.toolbar,
-  },
-  // Mobile format bar (2 rows)
-  fmtBarMob:    { backgroundColor: C.toolbar, borderBottomWidth: 1, borderBottomColor: '#e1e5f1', flexShrink: 0, paddingVertical: 5, paddingHorizontal: 12, gap: 5 },
-  fmtRow:       { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  linkBar:      { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 4, paddingBottom: 2 },
-  linkInput:    { flex: 1, height: 32, backgroundColor: C.white, borderWidth: 1, borderColor: C.border, borderRadius: R.sm, paddingHorizontal: 10, fontSize: 13, color: C.text, outlineWidth: 0 } as any,
-  linkInsertBtn:{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: C.primary, borderRadius: R.sm },
-  linkInsertTxt:{ fontSize: 12.5, fontWeight: '600', color: C.white },
-  fmtBtn:       { paddingHorizontal: 9, paddingVertical: 5, borderRadius: R.sm, borderWidth: 1, borderColor: C.border },
-  fmtBtnActive: { backgroundColor: C.primaryLight, borderColor: C.primary },
-  fmtTxt:       { fontSize: 12.5, color: '#383d4b', fontWeight: '500' },
-  fmtBold:      { fontWeight: '700' },
-  fmtItalic:    { fontStyle: 'italic' },
-  fmtUnderline: { textDecorationLine: 'underline' },
-  fmtHighlight: { backgroundColor: '#ffe066', borderRadius: 2, overflow: 'hidden', paddingHorizontal: 2 },
-  fmtActive:    { color: C.primary },
-  fmtDiv:       { width: 1, height: 18, backgroundColor: C.border, marginHorizontal: 2 },
-  body:              { flex: 1, flexDirection: 'row' },
-  outline:           { width: 260, flexShrink: 0, backgroundColor: C.sidebarBg, borderRightWidth: 1, borderRightColor: C.border, padding: S.md },
-  outlineClosed:     { width: 60, flexShrink: 0, backgroundColor: C.sidebarBg, borderRightWidth: 1, borderRightColor: C.border, alignItems: 'center', paddingTop: 12 },
-  outlineToggleMob:  { position: 'absolute', right: 12, top: 12, zIndex: 10, width: 32, height: 32, borderRadius: R.md, backgroundColor: C.sidebarBg, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' },
-  outlineMobOverlay: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 190, zIndex: 20, backgroundColor: C.sidebarBg, borderLeftWidth: 1, borderLeftColor: C.border, padding: S.md },
-  outlineIconBtn:    { padding: 6 },
-  outlineIconTxt:    { fontSize: 16, color: C.textLabel },
-  outlineHead:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: S.sm },
-  outlineClose: { fontSize: 18, color: C.textMuted, paddingHorizontal: 4 },
-  outlineHeader:{ fontSize: 11, fontWeight: '600', letterSpacing: 1, color: C.textLabel },
-  outlineItem:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, borderRadius: R.md },
-  outlineBar:   { width: 3, height: 16, borderRadius: 3, backgroundColor: C.primary, flexShrink: 0 },
-  outlineTxt:   { fontSize: 12.5, color: '#383d4b', flex: 1 },
-  outlineTxtTitle: { fontWeight: '700', color: C.primary },
-  outlineEmpty: { fontSize: 11.5, color: C.textMuted, lineHeight: 18 },
-  editorScroll: { flex: 1, backgroundColor: Platform.OS === 'web' ? C.bg : C.white },
-  editorContent:{
-    alignItems: 'center',
-    ...(Platform.OS === 'web'
-      ? { padding: 12, paddingBottom: 60 }
-      : { flexGrow: 1 }),
-  },
-  paper: Platform.OS === 'web' ? {
-    width: 768, maxWidth: '100%',
-    backgroundColor: C.white, borderWidth: 1, borderColor: '#e1e5f1',
-    borderRadius: R.sm, padding: 40,
-    boxShadow: '0 14px 40px -22px rgba(20,30,60,0.3)',
-  } as any : {
-    flex: 1, width: '100%', backgroundColor: C.white,
-    padding: 16, paddingBottom: 60,
-  },
-  lineRow:      { flexDirection: 'row', alignItems: 'flex-start', width: '100%' },
-  lineRowList:  { paddingLeft: 4 },
-  listPrefix:   { fontSize: 16, lineHeight: 28, color: '#383d4b', marginTop: 2, marginRight: 6, width: 20, flexShrink: 0 },
-  lineBase:     { flex: 1, outlineWidth: 0, paddingVertical: 2 } as any,
-});
+function makeStyles(C: ColorsType) {
+  return StyleSheet.create({
+    wrap:         { flex: 1 },
+    subBar:       {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      padding: 11, paddingHorizontal: 22, backgroundColor: C.toolbar,
+      borderBottomWidth: 1, borderBottomColor: C.border,
+    },
+    subLeft:      { flexDirection: 'row', alignItems: 'center', gap: 13, flex: 1 },
+    subRight:     { flexDirection: 'row', alignItems: 'center', gap: 11 },
+    backBtn:      { width: 32, height: 32, borderRadius: R.md, backgroundColor: C.primaryLight, alignItems: 'center', justifyContent: 'center' },
+    barDiv:       { width: 1, height: 18, backgroundColor: C.border, marginHorizontal: 2 },
+    docInfo:      { flex: 1 },
+    docInfoRow:   { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    dot:          { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
+    docTitle:       { fontSize: 16, fontWeight: '600', color: C.text, flex: 1, outlineWidth: 0 } as any,
+    docTitleInline: { fontSize: 14, fontWeight: '600', color: C.text, minWidth: 80, maxWidth: 200, outlineWidth: 0 } as any,
+    docMeta:      { fontSize: 12, color: C.textMuted },
+    savedBadge:   { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
+    savedTxt:     { fontSize: 12.5, color: C.success },
+    fmtBar:       {
+      flexDirection: 'row', alignItems: 'center', gap: 3, flexWrap: 'wrap',
+      paddingVertical: 6, paddingHorizontal: 16,
+      borderBottomWidth: 1, borderBottomColor: C.border, backgroundColor: C.toolbar,
+    },
+    fmtBarMob:    { backgroundColor: C.toolbar, borderBottomWidth: 1, borderBottomColor: C.border, flexShrink: 0, paddingVertical: 5, paddingHorizontal: 12, gap: 5 },
+    fmtRow:       { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    linkBar:      { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 4, paddingBottom: 2 },
+    linkInput:    { flex: 1, height: 32, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: R.sm, paddingHorizontal: 10, fontSize: 13, color: C.text, outlineWidth: 0 } as any,
+    linkInsertBtn:{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: C.primary, borderRadius: R.sm },
+    linkInsertTxt:{ fontSize: 12.5, fontWeight: '600', color: '#fff' },
+    fmtBtn:       { paddingHorizontal: 9, paddingVertical: 5, borderRadius: R.sm, borderWidth: 1, borderColor: C.border },
+    fmtBtnActive: { backgroundColor: C.primaryLight, borderColor: C.primary },
+    fmtTxt:       { fontSize: 12.5, color: C.textBody, fontWeight: '500' },
+    fmtBold:      { fontWeight: '700' },
+    fmtItalic:    { fontStyle: 'italic' },
+    fmtUnderline: { textDecorationLine: 'underline' },
+    fmtHighlight: { backgroundColor: '#ffe066', borderRadius: 2, overflow: 'hidden', paddingHorizontal: 2 },
+    fmtActive:    { color: C.primary },
+    fmtDiv:       { width: 1, height: 18, backgroundColor: C.border, marginHorizontal: 2 },
+    body:              { flex: 1, flexDirection: 'row' },
+    outline:           { width: 260, flexShrink: 0, backgroundColor: C.sidebarBg, borderRightWidth: 1, borderRightColor: C.border, padding: S.md },
+    outlineClosed:     { width: 60, flexShrink: 0, backgroundColor: C.sidebarBg, borderRightWidth: 1, borderRightColor: C.border, alignItems: 'center', paddingTop: 12 },
+    outlineToggleMob:  { position: 'absolute', right: 12, top: 12, zIndex: 10, width: 32, height: 32, borderRadius: R.md, backgroundColor: C.sidebarBg, borderWidth: 1, borderColor: C.border, alignItems: 'center', justifyContent: 'center' },
+    outlineMobOverlay: { position: 'absolute', right: 0, top: 0, bottom: 0, width: 190, zIndex: 20, backgroundColor: C.sidebarBg, borderLeftWidth: 1, borderLeftColor: C.border, padding: S.md },
+    outlineIconBtn:    { padding: 6 },
+    outlineIconTxt:    { fontSize: 16, color: C.textLabel },
+    outlineHead:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: S.sm },
+    outlineClose: { fontSize: 18, color: C.textMuted, paddingHorizontal: 4 },
+    outlineHeader:{ fontSize: 11, fontWeight: '600', letterSpacing: 1, color: C.textLabel },
+    outlineItem:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, borderRadius: R.md },
+    outlineBar:   { width: 3, height: 16, borderRadius: 3, backgroundColor: C.primary, flexShrink: 0 },
+    outlineTxt:   { fontSize: 12.5, color: C.textBody, flex: 1 },
+    outlineTxtTitle: { fontWeight: '700', color: C.primary },
+    outlineEmpty: { fontSize: 11.5, color: C.textMuted, lineHeight: 18 },
+    editorScroll: { flex: 1, backgroundColor: C.bg },
+    editorContent:{
+      alignItems: 'center',
+      ...(Platform.OS === 'web'
+        ? { padding: 12, paddingBottom: 60 }
+        : { flexGrow: 1 }),
+    },
+    paper: Platform.OS === 'web' ? {
+      width: 768, maxWidth: '100%',
+      backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
+      borderRadius: R.sm, padding: 40,
+      boxShadow: '0 14px 40px -22px rgba(20,30,60,0.3)',
+    } as any : {
+      flex: 1, width: '100%', backgroundColor: C.surface,
+      padding: 16, paddingBottom: 60,
+    },
+    lineRow:      { flexDirection: 'row', alignItems: 'flex-start', width: '100%' },
+    lineRowList:  { paddingLeft: 4 },
+    listPrefix:   { fontSize: 16, lineHeight: 28, color: C.textBody, marginTop: 2, marginRight: 6, width: 20, flexShrink: 0 },
+    lineBase:     { flex: 1, outlineWidth: 0, paddingVertical: 2 } as any,
+  });
+}

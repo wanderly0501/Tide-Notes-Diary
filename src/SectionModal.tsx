@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
@@ -7,7 +7,8 @@ import {
 
 const STATUS_BAR_HEIGHT = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0;
 import * as ImagePicker from 'expo-image-picker';
-import { C, R, S } from './theme';
+import { R, S, ColorsType } from './theme';
+import { useTheme } from './ThemeContext';
 import { Section, Block, BulletsBlock, CheckboxBlock, ImageBlock } from './types';
 import { useApp } from './context';
 import { uuid, nowISO, todayISO } from './utils';
@@ -22,6 +23,8 @@ interface Props {
 
 export function SectionModal({ visible, initial, onClose, onSave }: Props) {
   const { tags, userId } = useApp();
+  const { C } = useTheme();
+  const s = useMemo(() => makeMainStyles(C), [C]);
 
   const [title, setTitle]               = useState('');
   const [selTags, setSelTags]           = useState<string[]>([]);
@@ -272,10 +275,11 @@ function countWords(text: string) {
 }
 
 // Web-only: native <textarea> that auto-grows with content
-function WebTextArea({ value, onChange, onSel }: {
+function WebTextArea({ value, onChange, onSel, C }: {
   value: string;
   onChange(v: string): void;
   onSel(start: number, end: number): void;
+  C: ColorsType;
 }) {
   const ref = useRef<any>(null);
 
@@ -312,6 +316,7 @@ function WebTextArea({ value, onChange, onSel }: {
 }
 
 function TextBlockEditor({ value, onChange }: { value: string; onChange(v: string): void }) {
+  const { C } = useTheme();
   const selRef    = useRef({ start: 0, end: 0 });
   const [height, setHeight] = useState<number | undefined>(undefined);
   const wordCount = countWords(value);
@@ -333,68 +338,52 @@ function TextBlockEditor({ value, onChange }: { value: string; onChange(v: strin
     onChange(value.slice(0, lineStart) + '• ' + value.slice(lineStart));
   };
 
+  const fb = useMemo(() => makeFmtBarStyles(C), [C]);
+  const sMain = useMemo(() => makeMainStyles(C), [C]);
+
   const fmtBar = (
     <View style={fb.bar}>
-      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('**')}>
-        <Text style={fb.bold}>B</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('*')}>
-        <Text style={fb.italic}>I</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('__')}>
-        <Text style={fb.under}>U</Text>
-      </TouchableOpacity>
+      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('**')}><Text style={fb.bold}>B</Text></TouchableOpacity>
+      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('*')}><Text style={fb.italic}>I</Text></TouchableOpacity>
+      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('__')}><Text style={fb.under}>U</Text></TouchableOpacity>
       <View style={fb.sep} />
-      <TouchableOpacity style={fb.btn} onPress={insertBullet}>
-        <Text style={fb.fmtTxt}>• List</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('`')}>
-        <Text style={fb.code}>{ '{ }' }</Text>
-      </TouchableOpacity>
+      <TouchableOpacity style={fb.btn} onPress={insertBullet}><Text style={fb.fmtTxt}>• List</Text></TouchableOpacity>
+      <TouchableOpacity style={fb.btn} onPress={() => applyFormat('`')}><Text style={fb.code}>{'{ }'}</Text></TouchableOpacity>
     </View>
   );
 
   return (
     <View>
       {fmtBar}
-      {atLimit && <Text style={s.wordLimitTxt}>Word limit reached (1000)</Text>}
+      {atLimit && <Text style={{ fontSize: 11, color: '#c0392b', marginBottom: 4 }}>Word limit reached (1000)</Text>}
       {Platform.OS === 'web' ? (
-        <WebTextArea
-          value={value}
-          onChange={handleChange}
-          onSel={(start, end) => { selRef.current = { start, end }; }}
-        />
+        <WebTextArea value={value} onChange={handleChange} onSel={(start, end) => { selRef.current = { start, end }; }} C={C} />
       ) : (
         <TextInput
-          style={[s.textBlock, height !== undefined ? { height } : undefined]}
-          multiline
-          scrollEnabled={false}
-          value={value}
-          onChangeText={handleChange}
-          placeholder="Write something…"
-          placeholderTextColor={C.textMuted}
+          style={[sMain.textBlock, height !== undefined ? { height } : undefined]}
+          multiline scrollEnabled={false} value={value} onChangeText={handleChange}
+          placeholder="Write something…" placeholderTextColor={C.textMuted}
           textAlignVertical="top"
           onSelectionChange={e => { selRef.current = e.nativeEvent.selection; }}
-          onContentSizeChange={e => {
-            const h = e.nativeEvent.contentSize.height;
-            if (h > 0) setHeight(h);
-          }}
+          onContentSizeChange={e => { const h = e.nativeEvent.contentSize.height; if (h > 0) setHeight(h); }}
         />
       )}
     </View>
   );
 }
 
-const fb = StyleSheet.create({
-  bar:    { flexDirection: 'row', alignItems: 'center', gap: 2, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: C.borderLight, marginBottom: 8 },
-  btn:    { paddingHorizontal: 8, paddingVertical: 4, borderRadius: R.sm },
-  bold:   { fontSize: 13, fontWeight: '700', color: C.textBody },
-  italic: { fontSize: 13, fontStyle: 'italic', color: C.textBody },
-  under:  { fontSize: 13, textDecorationLine: 'underline', color: C.textBody },
-  fmtTxt: { fontSize: 12, color: C.textBody },
-  code:   { fontSize: 11, color: C.textBody, fontFamily: Platform.OS === 'web' ? 'ui-monospace,monospace' : 'monospace' },
-  sep:    { width: 1, height: 16, backgroundColor: C.borderLight, marginHorizontal: 4 },
-});
+function makeFmtBarStyles(C: ColorsType) {
+  return StyleSheet.create({
+    bar:    { flexDirection: 'row', alignItems: 'center', gap: 2, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: C.borderLight, marginBottom: 8 },
+    btn:    { paddingHorizontal: 8, paddingVertical: 4, borderRadius: R.sm },
+    bold:   { fontSize: 13, fontWeight: '700', color: C.textBody },
+    italic: { fontSize: 13, fontStyle: 'italic', color: C.textBody },
+    under:  { fontSize: 13, textDecorationLine: 'underline', color: C.textBody },
+    fmtTxt: { fontSize: 12, color: C.textBody },
+    code:   { fontSize: 11, color: C.textBody, fontFamily: Platform.OS === 'web' ? 'ui-monospace,monospace' : 'monospace' },
+    sep:    { width: 1, height: 16, backgroundColor: C.borderLight, marginHorizontal: 4 },
+  });
+}
 
 // ── Checkbox editor ───────────────────────────────────────────────────────────
 
@@ -402,6 +391,18 @@ function CheckboxEditor({ items, onChange }: {
   items: Array<{ text: string; checked: boolean }>;
   onChange(items: Array<{ text: string; checked: boolean }>): void;
 }) {
+  const { C } = useTheme();
+  const cb = useMemo(() => StyleSheet.create({
+    row:        { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+    box:        { width: 18, height: 18, borderRadius: 4, borderWidth: 1.5, borderColor: C.border, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+    boxChecked: { backgroundColor: '#8a8f9e', borderColor: '#8a8f9e' },
+    input:      { flex: 1, fontSize: 14.5, color: C.textBody, borderBottomWidth: 1, borderBottomColor: C.borderLight, paddingVertical: 4, outlineWidth: 0 } as any,
+    inputDone:  { color: C.textMuted, textDecorationLine: 'line-through' },
+    del:        { padding: 4 },
+    addBtn:     { marginTop: 4, paddingVertical: 6 },
+    addBtnTxt:  { fontSize: 13, color: C.buttonBlue },
+  }), [C]);
+
   const update = (i: number, patch: Partial<{ text: string; checked: boolean }>) =>
     onChange(items.map((x, j) => j === i ? { ...x, ...patch } : x));
   const remove = (i: number) => items.length > 1 && onChange(items.filter((_, j) => j !== i));
@@ -412,14 +413,12 @@ function CheckboxEditor({ items, onChange }: {
       {items.map((item, i) => (
         <View key={i} style={cb.row}>
           <TouchableOpacity style={[cb.box, item.checked && cb.boxChecked]} onPress={() => update(i, { checked: !item.checked })}>
-            {item.checked && <Ionicons name="checkmark" size={11} color={C.white} />}
+            {item.checked && <Ionicons name="checkmark" size={11} color="#fff" />}
           </TouchableOpacity>
           <TextInput
             style={[cb.input, item.checked && cb.inputDone]}
-            value={item.text}
-            onChangeText={v => update(i, { text: v })}
-            placeholder="Item…"
-            placeholderTextColor={C.textMuted}
+            value={item.text} onChangeText={v => update(i, { text: v })}
+            placeholder="Item…" placeholderTextColor={C.textMuted}
             // @ts-ignore
             outlineStyle="none"
           />
@@ -437,22 +436,20 @@ function CheckboxEditor({ items, onChange }: {
   );
 }
 
-const cb = StyleSheet.create({
-  row:        { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
-  box:        { width: 18, height: 18, borderRadius: 4, borderWidth: 1.5, borderColor: C.border, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  boxChecked: { backgroundColor: '#8a8f9e', borderColor: '#8a8f9e' },
-  tick:       { fontSize: 11, color: C.white, fontWeight: '700' },
-  input:      { flex: 1, fontSize: 14.5, color: C.textBody, borderBottomWidth: 1, borderBottomColor: C.borderLight, paddingVertical: 4, outlineWidth: 0 } as any,
-  inputDone:  { color: C.textMuted, textDecorationLine: 'line-through' },
-  del:        { padding: 4 },
-  delTxt:     { fontSize: 12, color: C.textMuted },
-  addBtn:     { marginTop: 4, paddingVertical: 6 },
-  addBtnTxt:  { fontSize: 13, color: C.buttonBlue },
-});
-
 // ── Bullets editor ────────────────────────────────────────────────────────────
 
 function BulletsEditor({ items, onChange }: { items: string[]; onChange(items: string[]): void }) {
+  const { C } = useTheme();
+  const bs = useMemo(() => StyleSheet.create({
+    row:      { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 },
+    dot:      { width: 6, height: 6, borderRadius: 3, backgroundColor: C.bullet, flexShrink: 0 },
+    input:    { flex: 1, fontSize: 14.5, color: C.textBody, borderBottomWidth: 1, borderBottomColor: C.borderLight, paddingVertical: 4, outlineWidth: 0 } as any,
+    del:      { padding: 4 },
+    delTxt:   { fontSize: 12, color: C.textMuted },
+    addBtn:   { marginTop: 4, paddingVertical: 6 },
+    addBtnTxt:{ fontSize: 13, color: C.primary },
+  }), [C]);
+
   const update = (i: number, v: string) => onChange(items.map((x, j) => j === i ? v : x));
   const remove = (i: number) => items.length > 1 && onChange(items.filter((_, j) => j !== i));
   const add    = () => onChange([...items, '']);
@@ -462,11 +459,8 @@ function BulletsEditor({ items, onChange }: { items: string[]; onChange(items: s
         <View key={i} style={bs.row}>
           <View style={bs.dot} />
           <TextInput
-            style={bs.input}
-            value={item}
-            onChangeText={v => update(i, v)}
-            placeholder="Bullet point…"
-            placeholderTextColor={C.textMuted}
+            style={bs.input} value={item} onChangeText={v => update(i, v)}
+            placeholder="Bullet point…" placeholderTextColor={C.textMuted}
             // @ts-ignore
             outlineStyle="none"
           />
@@ -484,118 +478,96 @@ function BulletsEditor({ items, onChange }: { items: string[]; onChange(items: s
   );
 }
 
-const bs = StyleSheet.create({
-  row:      { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 },
-  dot:      { width: 6, height: 6, borderRadius: 3, backgroundColor: C.bullet, flexShrink: 0 },
-  input:    { flex: 1, fontSize: 14.5, color: C.textBody, borderBottomWidth: 1, borderBottomColor: C.borderLight, paddingVertical: 4, outlineWidth: 0 } as any,
-  del:      { padding: 4 },
-  delTxt:   { fontSize: 12, color: C.textMuted },
-  addBtn:   { marginTop: 4, paddingVertical: 6 },
-  addBtnTxt:{ fontSize: 13, color: C.primary },
-});
-
 // ── Image block ───────────────────────────────────────────────────────────────
 
-function ImageSlot({ uri, onReplace, label }: { uri?: string; onReplace(): void; label: string }) {
+function ImageSlot({ uri, onReplace, label, C }: { uri?: string; onReplace(): void; label: string; C: ColorsType }) {
   return (
-    <TouchableOpacity style={ib.slot} onPress={onReplace} activeOpacity={0.8}>
+    <TouchableOpacity style={{ flex: 1, overflow: 'hidden' }} onPress={onReplace} activeOpacity={0.8}>
       {uri
         ? <Image source={{ uri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-        : <View style={ib.placeholder}><Text style={ib.placeholderTxt}>{label}</Text></View>
+        : <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><Text style={{ fontSize: 12, color: C.textMuted }}>{label}</Text></View>
       }
-      <View style={ib.slotOverlay}>
-        <Text style={ib.slotOverlayTxt}>Replace</Text>
+      <View style={{ position: 'absolute', bottom: 6, right: 6, backgroundColor: 'rgba(0,0,0,0.45)', borderRadius: 4, paddingHorizontal: 7, paddingVertical: 3 }}>
+        <Text style={{ fontSize: 11, color: '#fff', fontWeight: '600' }}>Replace</Text>
       </View>
     </TouchableOpacity>
   );
 }
 
 function ImageBlockView({ block, onReplace, onToggleLayout }: { block: ImageBlock; onReplace(slot: 1 | 2): void; onToggleLayout(): void }) {
+  const { C } = useTheme();
   return (
-    <View style={ib.wrap}>
-      <View style={ib.canvas}>
+    <View style={{ marginBottom: 8 }}>
+      <View style={{ aspectRatio: 3/2, borderWidth: 1, borderColor: C.border, overflow: 'hidden', backgroundColor: C.card }}>
         {block.layout === 'split' ? (
-          <View style={ib.splitRow}>
-            <ImageSlot uri={block.uri}  onReplace={() => onReplace(1)} label="Tap to add" />
-            <View style={ib.splitDivider} />
-            <ImageSlot uri={block.uri2} onReplace={() => onReplace(2)} label="Tap to add" />
+          <View style={{ flex: 1, flexDirection: 'row' }}>
+            <ImageSlot uri={block.uri}  onReplace={() => onReplace(1)} label="Tap to add" C={C} />
+            <View style={{ width: 6, backgroundColor: C.bg }} />
+            <ImageSlot uri={block.uri2} onReplace={() => onReplace(2)} label="Tap to add" C={C} />
           </View>
         ) : (
-          <ImageSlot uri={block.uri} onReplace={() => onReplace(1)} label="Tap to add photo" />
+          <ImageSlot uri={block.uri} onReplace={() => onReplace(1)} label="Tap to add photo" C={C} />
         )}
       </View>
-      <View style={ib.actions}>
-        <TouchableOpacity onPress={onToggleLayout} style={ib.btn}>
-          <Text style={ib.btnTxt}>{block.layout === 'split' ? 'Single photo' : 'Split in two'}</Text>
+      <View style={{ flexDirection: 'row', gap: 10, marginTop: 6 }}>
+        <TouchableOpacity onPress={onToggleLayout} style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: R.sm, borderWidth: 1, borderColor: C.border }}>
+          <Text style={{ fontSize: 12, color: C.textBody }}>{block.layout === 'split' ? 'Single photo' : 'Split in two'}</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-const ib = StyleSheet.create({
-  wrap:            { marginBottom: 8 },
-  canvas:          { aspectRatio: 3/2, borderWidth: 1, borderColor: '#d3d9e8', overflow: 'hidden', backgroundColor: '#e6eaf5' },
-  splitRow:        { flex: 1, flexDirection: 'row' },
-  splitDivider:    { width: 6, backgroundColor: '#fff' },
-  slot:            { flex: 1, overflow: 'hidden' },
-  placeholder:     { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  placeholderTxt:  { fontSize: 12, color: C.textMuted },
-  slotOverlay:     { position: 'absolute', bottom: 6, right: 6, backgroundColor: 'rgba(0,0,0,0.45)', borderRadius: 4, paddingHorizontal: 7, paddingVertical: 3 },
-  slotOverlayTxt:  { fontSize: 11, color: '#fff', fontWeight: '600' },
-  actions:         { flexDirection: 'row', gap: 10, marginTop: 6 },
-  btn:             { paddingHorizontal: 10, paddingVertical: 4, borderRadius: R.sm, borderWidth: 1, borderColor: C.border },
-  btnTxt:          { fontSize: 12, color: C.textBody },
-});
-
 // ── Main styles ───────────────────────────────────────────────────────────────
 
-const s = StyleSheet.create({
-  root: {
-    flex: 1, backgroundColor: C.bg,
-    paddingTop: Platform.OS === 'web' ? 0 : STATUS_BAR_HEIGHT,
-  },
-  topBar: {
-    height: 62, flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingHorizontal: S.lg, backgroundColor: C.toolbar,
-    borderBottomWidth: 1, borderBottomColor: C.border,
-  },
-  cancelBtn:  { paddingHorizontal: 12, paddingVertical: 6, borderRadius: R.md, backgroundColor: C.border },
-  cancelTxt:  { fontSize: 13.5, color: C.textBody },
-  titleInput: { flex: 1, fontSize: 16, fontWeight: '600', color: C.text, textAlign: 'center', outlineWidth: 0 } as any,
-  saveBtn:    { paddingHorizontal: 16, paddingVertical: 6, borderRadius: R.md, backgroundColor: C.buttonBlue },
-  saveTxt:    { fontSize: 13.5, fontWeight: '600', color: C.white },
-  bodyScroll: { flex: 1 },
-  body:       { maxWidth: 760, width: '100%', alignSelf: 'center', padding: S.lg, paddingBottom: 40 },
-  metaRow:    { flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginBottom: S.lg },
-  metaField:  { flex: 1 },
-  metaLabel:  { fontSize: 10, fontWeight: '700', letterSpacing: 1, color: C.textLabel, marginBottom: 4 },
-  metaInput:  {
-    fontSize: 14, color: C.text, borderWidth: 1, borderColor: C.border,
-    borderRadius: R.sm, paddingHorizontal: S.sm, paddingVertical: 6,
-    backgroundColor: C.white, outlineWidth: 0,
-  } as any,
-  reminderToggle:    { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: R.md, borderWidth: 1, borderColor: C.border, backgroundColor: C.white },
-  reminderToggleOn:  { backgroundColor: '#f4e2e2', borderColor: C.pinkBar },
-  reminderToggleTxt: { fontSize: 13, color: C.textLabel },
-  reminderDateRow:   { marginBottom: S.lg },
-  section:       { marginBottom: S.xl },
-  sectionLabel:  { fontSize: 10, fontWeight: '700', letterSpacing: 1, color: C.textLabel, marginBottom: S.sm },
-  tagGrid:       { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tagChip:       { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: R.pill, borderWidth: 1.5, borderColor: C.borderLight, backgroundColor: C.white },
-  tagDot:        { width: 7, height: 7, borderRadius: 4 },
-  tagName:       { fontSize: 13, color: C.textMuted },
-  blockWrap:     { marginBottom: S.lg, backgroundColor: C.white, borderRadius: R.md, borderWidth: 1, borderColor: C.borderLight, padding: S.md },
-  textBlock:     { fontSize: 14.5, lineHeight: 23, color: C.textBody, ...Platform.select({ web: { resize: 'none', outline: 'none' } as any }) } as any,
-  wordLimitTxt:  { fontSize: 11, color: '#c0392b', marginBottom: 4 },
-  removeBlock:   { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end', marginTop: 6, paddingVertical: 4, paddingHorizontal: 8, borderRadius: R.sm },
-  removeBlockTxt:{ fontSize: 12, color: '#d32f2f' },
-  addRowOuter:   { borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.toolbar, paddingBottom: Platform.OS === 'web' ? 0 : 20 },
-  addRow:        { flexDirection: 'row', gap: 10, padding: S.lg, maxWidth: 760, width: '100%', alignSelf: 'center' },
-  addBtn:            { flex: 1, paddingVertical: 9, borderRadius: R.md, borderWidth: 1, borderColor: C.border, backgroundColor: C.white, alignItems: 'center' },
-  addBtnTxt:         { fontSize: 13, color: C.textBody, fontWeight: '500' },
-  addBtnDisabled:    { opacity: 0.4 },
-  addBtnTxtDisabled: { color: C.textMuted },
-  uploadOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.85)', alignItems: 'center', justifyContent: 'center', gap: 12 },
-  uploadTxt:     { fontSize: 14, color: C.textBody, fontWeight: '500' },
-});
+function makeMainStyles(C: ColorsType) {
+  return StyleSheet.create({
+    root: {
+      flex: 1, backgroundColor: C.bg,
+      paddingTop: Platform.OS === 'web' ? 0 : STATUS_BAR_HEIGHT,
+    },
+    topBar: {
+      height: 62, flexDirection: 'row', alignItems: 'center', gap: 12,
+      paddingHorizontal: S.lg, backgroundColor: C.toolbar,
+      borderBottomWidth: 1, borderBottomColor: C.border,
+    },
+    cancelBtn:  { paddingHorizontal: 12, paddingVertical: 6, borderRadius: R.md, backgroundColor: C.border },
+    cancelTxt:  { fontSize: 13.5, color: C.textBody },
+    titleInput: { flex: 1, fontSize: 16, fontWeight: '600', color: C.text, textAlign: 'center', outlineWidth: 0 } as any,
+    saveBtn:    { paddingHorizontal: 16, paddingVertical: 6, borderRadius: R.md, backgroundColor: C.buttonBlue },
+    saveTxt:    { fontSize: 13.5, fontWeight: '600', color: '#fff' },
+    bodyScroll: { flex: 1 },
+    body:       { maxWidth: 760, width: '100%', alignSelf: 'center', padding: S.lg, paddingBottom: 40 },
+    metaRow:    { flexDirection: 'row', alignItems: 'flex-end', gap: 12, marginBottom: S.lg },
+    metaField:  { flex: 1 },
+    metaLabel:  { fontSize: 10, fontWeight: '700', letterSpacing: 1, color: C.textLabel, marginBottom: 4 },
+    metaInput:  {
+      fontSize: 14, color: C.text, borderWidth: 1, borderColor: C.border,
+      borderRadius: R.sm, paddingHorizontal: S.sm, paddingVertical: 6,
+      backgroundColor: C.surface, outlineWidth: 0,
+    } as any,
+    reminderToggle:    { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: R.md, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface },
+    reminderToggleOn:  { backgroundColor: '#f4e2e2', borderColor: C.pinkBar },
+    reminderToggleTxt: { fontSize: 13, color: C.textLabel },
+    reminderDateRow:   { marginBottom: S.lg },
+    section:       { marginBottom: S.xl },
+    sectionLabel:  { fontSize: 10, fontWeight: '700', letterSpacing: 1, color: C.textLabel, marginBottom: S.sm },
+    tagGrid:       { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    tagChip:       { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: R.pill, borderWidth: 1.5, borderColor: C.borderLight, backgroundColor: C.surface },
+    tagDot:        { width: 7, height: 7, borderRadius: 4 },
+    tagName:       { fontSize: 13, color: C.textMuted },
+    blockWrap:     { marginBottom: S.lg, backgroundColor: C.surface, borderRadius: R.md, borderWidth: 1, borderColor: C.borderLight, padding: S.md },
+    textBlock:     { fontSize: 14.5, lineHeight: 23, color: C.textBody, ...Platform.select({ web: { resize: 'none', outline: 'none' } as any }) } as any,
+    wordLimitTxt:  { fontSize: 11, color: '#c0392b', marginBottom: 4 },
+    removeBlock:   { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end', marginTop: 6, paddingVertical: 4, paddingHorizontal: 8, borderRadius: R.sm },
+    removeBlockTxt:{ fontSize: 12, color: '#d32f2f' },
+    addRowOuter:   { borderTopWidth: 1, borderTopColor: C.border, backgroundColor: C.toolbar, paddingBottom: Platform.OS === 'web' ? 0 : 20 },
+    addRow:        { flexDirection: 'row', gap: 10, padding: S.lg, maxWidth: 760, width: '100%', alignSelf: 'center' },
+    addBtn:            { flex: 1, paddingVertical: 9, borderRadius: R.md, borderWidth: 1, borderColor: C.border, backgroundColor: C.surface, alignItems: 'center' },
+    addBtnTxt:         { fontSize: 13, color: C.textBody, fontWeight: '500' },
+    addBtnDisabled:    { opacity: 0.4 },
+    addBtnTxtDisabled: { color: C.textMuted },
+    uploadOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(255,255,255,0.85)', alignItems: 'center', justifyContent: 'center', gap: 12 },
+    uploadTxt:     { fontSize: 14, color: C.textBody, fontWeight: '500' },
+  });
+}

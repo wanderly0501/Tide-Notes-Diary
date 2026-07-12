@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View, Text, Image, TextInput, TouchableOpacity, StyleSheet,
   Alert, Platform, Modal, Pressable, ScrollView, Dimensions, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { C, R } from './theme';
+import { R, ColorsType } from './theme';
+import { useTheme } from './ThemeContext';
 import { Section, Block, CheckboxBlock, BulletsBlock } from './types';
 import { formatDateDisplay } from './utils';
 import { useApp } from './context';
 
 // Renders inline markdown + auto-linked URLs
 function MarkdownText({ text, style }: { text: string; style?: any }) {
-  // Flatten to a plain object so nested Text style overrides apply correctly on native
+  const { C } = useTheme();
   const flat: any = StyleSheet.flatten(style) || {};
 
   const patterns: Array<{ re: RegExp; st: object; link?: boolean }> = [
@@ -98,11 +99,9 @@ const iv = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', alignItems: 'center', justifyContent: 'center' },
   img:     { width: Dimensions.get('window').width, height: Dimensions.get('window').height },
   closeBtn:{ position: 'absolute', top: 52, right: 20, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
-  closeTxt:{ fontSize: 16, color: '#fff', fontWeight: '600' },
 });
 
-
-function AutoFitImage({ uri, onPress }: { uri: string; onPress?(): void }) {
+function AutoFitImage({ uri, onPress, C }: { uri: string; onPress?(): void; C: ColorsType }) {
   const [aspect, setAspect] = useState<number>(1.5);
 
   useEffect(() => {
@@ -111,14 +110,11 @@ function AutoFitImage({ uri, onPress }: { uri: string; onPress?(): void }) {
     }, () => {});
   }, [uri]);
 
-  // Box is at most 3:2 tall (max height = 2/3 of width).
-  // Portrait images fill the full box height; their width is narrower — left-aligned via left:0.
-  // Landscape images wider than 3:2 get a shorter box matching their natural ratio.
   const boxAspect = Math.max(aspect, 1.5);
 
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={s.imgAutoOuter}>
-      <View style={[s.imgAutoWrap, { aspectRatio: boxAspect }]}>
+    <TouchableOpacity activeOpacity={0.9} onPress={onPress} style={{ width: '100%', marginBottom: 12 }}>
+      <View style={{ width: '100%', aspectRatio: boxAspect, backgroundColor: C.card, overflow: 'hidden' }}>
         <Image
           source={{ uri }}
           style={{ position: 'absolute', top: 0, bottom: 0, left: 0, aspectRatio: aspect }}
@@ -129,8 +125,58 @@ function AutoFitImage({ uri, onPress }: { uri: string; onPress?(): void }) {
   );
 }
 
+function makeStyles(C: ColorsType) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: C.card, borderWidth: 1, borderColor: C.border,
+      borderRadius: R.lg, paddingTop: 18, paddingHorizontal: 18, paddingBottom: 4, marginBottom: 14,
+    },
+    header:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 14, marginBottom: 6 },
+    title:        { fontSize: 17, fontWeight: '600', color: C.text, letterSpacing: -0.17, marginBottom: 10 },
+    tagRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: 7, flex: 1 },
+    tagChip:      { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: C.tagBg, borderRadius: R.pill, paddingHorizontal: 9, paddingVertical: 2 },
+    tagDot:       { width: 7, height: 7, borderRadius: 4 },
+    tagTxt:       { fontSize: 12, color: C.tagText },
+    addTagBtn:    { width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: C.border, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
+    tagMenu: {
+      backgroundColor: C.surface, borderWidth: 1, borderColor: C.border,
+      borderRadius: R.md, minWidth: 160,
+      ...Platform.select({ web: { boxShadow: '0 4px 16px rgba(0,0,0,0.14)' } }),
+    },
+    tagMenuScroll: { maxHeight: 400, paddingVertical: 4 },
+    tagMenuItem:  { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 8 },
+    tagMenuCheck: { width: 15, height: 15, borderRadius: 3, borderWidth: 1.5, borderColor: C.border, alignItems: 'center', justifyContent: 'center' },
+    tagMenuDot:   { width: 8, height: 8, borderRadius: 4 },
+    tagMenuTxt:   { fontSize: 13, color: C.textBody },
+    reminderBadge:{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, backgroundColor: C.pinkSoft, borderRadius: R.pill, paddingHorizontal: 11, paddingVertical: 4, marginBottom: 8 },
+    reminderTxt:  { fontSize: 12, fontWeight: '600', color: C.pinkText },
+    headerActions:{ flexDirection: 'row', alignItems: 'center', gap: 6 },
+    actionBtn:    { paddingVertical: 5, paddingLeft: 6, paddingRight: 0 },
+    pinnedEmoji:  { fontSize: 13 },
+    foldPreview:  { fontSize: 13.5, color: C.textMuted, marginTop: 6, marginBottom: 2 },
+    foldBtn:      { alignSelf: 'flex-end', marginTop: 1, paddingBottom: 2, paddingLeft: 4, paddingRight: 0 },
+    bodyTxt:      { fontSize: 14.5, lineHeight: 23, color: C.textBody, marginBottom: 8 },
+    bulletList:   { marginTop: 4, marginBottom: 8, gap: 7 },
+    bulletRow:    { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
+    bullet:       { width: 6, height: 6, borderRadius: 3, backgroundColor: C.bullet, marginTop: 8, flexShrink: 0 },
+    bulletTxt:    { fontSize: 14.5, lineHeight: 23, color: C.textBody, flex: 1, outlineWidth: 0 } as any,
+    checkList:    { marginTop: 4, marginBottom: 8, gap: 6 },
+    checkRow:     { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    checkBox:     { width: 16, height: 16, borderRadius: 4, borderWidth: 1.5, borderColor: C.border, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+    checkBoxDone: { backgroundColor: '#8a8f9e', borderColor: '#8a8f9e' },
+    checkTxt:     { fontSize: 14, lineHeight: 22, color: C.textBody },
+    checkTxtDone: { color: C.textMuted, textDecorationLine: 'line-through' },
+    imgWrap:      { paddingBottom: '66.666%', overflow: 'hidden', marginBottom: 12, backgroundColor: C.card },
+    imgSplitRow:  { flex: 1, flexDirection: 'row' },
+    imgHalf:      { flex: 1, overflow: 'hidden' },
+  });
+}
+
 export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, onTagsChange }: Props) {
   const { tags: allTags } = useApp();
+  const { C } = useTheme();
+  const s = useMemo(() => makeStyles(C), [C]);
+
   const [folded, setFolded]           = useState(false);
   const [localBlocks, setLocalBlocks] = useState<Block[]>(section.blocks);
   const [localTags, setLocalTags]     = useState(section.tags);
@@ -183,10 +229,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
     const updated = localBlocks.map((b, bi) => {
       if (bi !== blockIdx || b.type !== 'checkbox') return b;
       const cb = b as CheckboxBlock;
-      return {
-        ...cb,
-        items: cb.items.map((it, ii) => ii === itemIdx ? { ...it, checked: !it.checked } : it),
-      };
+      return { ...cb, items: cb.items.map((it, ii) => ii === itemIdx ? { ...it, checked: !it.checked } : it) };
     });
     saveBlocks(updated);
   };
@@ -211,7 +254,6 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
 
   return (
     <View style={s.card}>
-      {/* Reminder badge */}
       {isReminder && (
         <View style={s.reminderBadge}>
           <Ionicons name="alarm-outline" size={12} color={C.pinkText} />
@@ -219,7 +261,6 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
         </View>
       )}
 
-      {/* Header: tags + actions */}
       <View style={s.header}>
         <View style={s.tagRow}>
           {section.isPinned && <Text style={s.pinnedEmoji}>📌</Text>}
@@ -236,7 +277,6 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
           )}
         </View>
 
-        {/* Tag picker dropdown */}
         <Modal visible={tagMenuOpen} transparent animationType="none" onRequestClose={() => setTagMenuOpen(false)}>
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setTagMenuOpen(false)} />
           <View style={[s.tagMenu, { position: 'absolute', top: tagMenuPos.top, left: tagMenuPos.left }]}>
@@ -246,7 +286,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
                 return (
                   <TouchableOpacity key={t.id} style={s.tagMenuItem} onPress={() => toggleSectionTag(t.id)}>
                     <View style={[s.tagMenuCheck, selected && { backgroundColor: t.color, borderColor: t.color }]}>
-                      {selected && <Ionicons name="checkmark" size={9} color={C.white} />}
+                      {selected && <Ionicons name="checkmark" size={9} color="#fff" />}
                     </View>
                     <View style={[s.tagMenuDot, { backgroundColor: t.color }]} />
                     <Text style={s.tagMenuTxt}>{t.name}</Text>
@@ -274,18 +314,12 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
         </View>
       </View>
 
-      {/* Title */}
       {!!section.title && <Text style={s.title}>{section.title}</Text>}
-
-      {/* Folded preview */}
       {folded && <Text style={s.foldPreview} numberOfLines={1}>{firstLine(section)}</Text>}
 
-      {/* Blocks */}
       {!folded && localBlocks.map((block, i) => {
         if (block.type === 'text') {
-          return (
-            <MarkdownText key={i} text={block.content} style={s.bodyTxt} />
-          );
+          return <MarkdownText key={i} text={block.content} style={s.bodyTxt} />;
         }
 
         if (block.type === 'bullets') {
@@ -318,7 +352,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
                     style={[s.checkBox, item.checked && s.checkBoxDone]}
                     onPress={() => toggleCheckbox(i, j)}
                   >
-                    {item.checked && <Ionicons name="checkmark" size={10} color={C.white} />}
+                    {item.checked && <Ionicons name="checkmark" size={10} color="#fff" />}
                   </TouchableOpacity>
                   <Text style={[s.checkTxt, item.checked && s.checkTxtDone]}>{item.text}</Text>
                 </View>
@@ -330,7 +364,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
         if (block.type === 'image') {
           if (block.layout !== 'split') {
             return block.uri ? (
-              <AutoFitImage key={i} uri={block.uri} onPress={() => setViewerUri(block.uri!)} />
+              <AutoFitImage key={i} uri={block.uri} onPress={() => setViewerUri(block.uri!)} C={C} />
             ) : null;
           }
           return (
@@ -346,7 +380,7 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
                       />
                     ) : null}
                   </TouchableOpacity>
-                  <TouchableOpacity style={[s.imgHalf, { borderLeftWidth: 6, borderLeftColor: '#fff' }]} activeOpacity={0.9} onPress={() => block.uri2 && setViewerUri(block.uri2)}>
+                  <TouchableOpacity style={[s.imgHalf, { borderLeftWidth: 6, borderLeftColor: C.card }]} activeOpacity={0.9} onPress={() => block.uri2 && setViewerUri(block.uri2)}>
                     {block.uri2 ? (
                       <Image
                         source={{ uri: block.uri2 }}
@@ -363,7 +397,6 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
         return null;
       })}
 
-      {/* Fold / unfold */}
       <TouchableOpacity style={s.foldBtn} onPress={() => setFolded(f => !f)} activeOpacity={0.6}>
         <Ionicons name={folded ? 'chevron-down-outline' : 'chevron-up-outline'} size={12} color="#b0b8c8" />
       </TouchableOpacity>
@@ -372,58 +405,3 @@ export function SectionCard({ section, onEdit, onDelete, onTogglePin, onUpdate, 
     </View>
   );
 }
-
-const s = StyleSheet.create({
-  card: {
-    backgroundColor: C.card, borderWidth: 1, borderColor: C.border,
-    borderRadius: R.lg, paddingTop: 18, paddingHorizontal: 18, paddingBottom: 4, marginBottom: 14,
-  },
-  header:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 14, marginBottom: 6 },
-  title:        { fontSize: 17, fontWeight: '600', color: C.text, letterSpacing: -0.17, marginBottom: 10 },
-  tagRow:       { flexDirection: 'row', flexWrap: 'wrap', gap: 7, flex: 1 },
-  tagChip:      { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: C.tagBg, borderRadius: R.pill, paddingHorizontal: 9, paddingVertical: 2 },
-  tagDot:       { width: 7, height: 7, borderRadius: 4 },
-  tagTxt:       { fontSize: 12, color: C.tagText },
-  addTagBtn:    { width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: C.border, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
-  addTagTxt:    { fontSize: 13, color: C.textMuted, lineHeight: 16, marginTop: -1 },
-  tagMenu: {
-    backgroundColor: C.white, borderWidth: 1, borderColor: C.border,
-    borderRadius: R.md, minWidth: 160,
-    ...Platform.select({ web: { boxShadow: '0 4px 16px rgba(0,0,0,0.12)' } }),
-  },
-  tagMenuScroll: { maxHeight: 400, paddingVertical: 4 },
-  tagMenuItem:  { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 8 },
-  tagMenuCheck: { width: 15, height: 15, borderRadius: 3, borderWidth: 1.5, borderColor: C.border, alignItems: 'center', justifyContent: 'center' },
-  tagMenuTick:  { fontSize: 9, color: C.white, fontWeight: '700' },
-  tagMenuDot:   { width: 8, height: 8, borderRadius: 4 },
-  tagMenuTxt:   { fontSize: 13, color: C.textBody },
-  reminderBadge:{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, backgroundColor: '#f4e2e2', borderRadius: R.pill, paddingHorizontal: 11, paddingVertical: 4, marginBottom: 8 },
-  reminderIcon: { fontSize: 12 },
-  reminderTxt:  { fontSize: 12, fontWeight: '600', color: C.pinkText },
-  headerActions:{ flexDirection: 'row', alignItems: 'center', gap: 6 },
-  actionBtn:    { paddingVertical: 5, paddingLeft: 6, paddingRight: 0 },
-  actionIcon:   { fontSize: 14, color: '#a0a8b8' },
-  pinnedEmoji:  { fontSize: 13 },
-  pinArrow:     { fontSize: 15, color: '#a0a8b8', fontWeight: '300' as any },
-  pinArrowOn:   { color: '#4a5a7a', fontWeight: '700' as any },
-  foldPreview:  { fontSize: 13.5, color: C.textMuted, marginTop: 6, marginBottom: 2 },
-  foldBtn:      { alignSelf: 'flex-end', marginTop: 1, paddingBottom: 2, paddingLeft: 4, paddingRight: 0 },
-
-  bodyTxt:      { fontSize: 14.5, lineHeight: 23, color: C.textBody, marginBottom: 8 },
-  bulletList:   { marginTop: 4, marginBottom: 8, gap: 7 },
-  bulletRow:    { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  bullet:       { width: 6, height: 6, borderRadius: 3, backgroundColor: C.bullet, marginTop: 8, flexShrink: 0 },
-  bulletTxt:    { fontSize: 14.5, lineHeight: 23, color: C.textBody, flex: 1, outlineWidth: 0 } as any,
-  checkList:    { marginTop: 4, marginBottom: 8, gap: 6 },
-  checkRow:     { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  checkBox:     { width: 16, height: 16, borderRadius: 4, borderWidth: 1.5, borderColor: C.border, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  checkBoxDone: { backgroundColor: '#8a8f9e', borderColor: '#8a8f9e' },
-  checkTick:    { fontSize: 10, color: C.white, fontWeight: '700' },
-  checkTxt:     { fontSize: 14, lineHeight: 22, color: C.textBody },
-  checkTxtDone: { color: C.textMuted, textDecorationLine: 'line-through' },
-  imgAutoOuter: { width: '100%', marginBottom: 12 },
-  imgAutoWrap:  { width: '100%', backgroundColor: C.card, overflow: 'hidden' },
-  imgWrap:      { paddingBottom: '66.666%', overflow: 'hidden', marginBottom: 12, backgroundColor: C.card },
-  imgSplitRow:  { flex: 1, flexDirection: 'row' },
-  imgHalf:      { flex: 1, overflow: 'hidden' },
-});

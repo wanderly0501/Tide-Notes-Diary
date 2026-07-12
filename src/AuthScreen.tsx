@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ActivityIndicator, Platform, Image, KeyboardAvoidingView, ScrollView,
@@ -6,13 +6,16 @@ import {
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { supabase } from './supabase';
-import { C, R, S } from './theme';
+import { R, S, ColorsType } from './theme';
+import { useTheme } from './ThemeContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
 type Mode = 'signin' | 'signup';
 
 export function AuthScreen() {
+  const { C } = useTheme();
+  const s = useMemo(() => makeStyles(C), [C]);
   const [mode, setMode]       = useState<Mode>('signin');
   const [email, setEmail]     = useState('');
   const [password, setPassword] = useState('');
@@ -151,29 +154,31 @@ export function AuthScreen() {
   );
 }
 
-const s = StyleSheet.create({
-  root:       { flex: 1, backgroundColor: C.bg },
-  scroll:     { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  card:       { width: '100%', maxWidth: 400, backgroundColor: C.card, borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 32, alignItems: 'center', ...Platform.select({ web: { boxShadow: '0 8px 32px rgba(0,0,0,0.08)' } as any }) },
-  logo:       { width: 64, height: 64, marginBottom: 8 },
-  appName:    { fontSize: 26, fontWeight: '700', color: C.text, letterSpacing: -0.5, marginBottom: 4 },
-  tagline:    { fontSize: 14, color: C.textMuted, marginBottom: 28 },
-  googleBtn:  { flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%', height: 44, borderRadius: R.pill, borderWidth: 1.5, borderColor: C.border, backgroundColor: C.white, justifyContent: 'center', marginBottom: 20 },
-  googleIcon: { fontSize: 16, fontWeight: '700', color: '#4285F4' },
-  googleTxt:  { fontSize: 14, fontWeight: '600', color: C.text },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, width: '100%', marginBottom: 20 },
-  dividerLine:{ flex: 1, height: 1, backgroundColor: C.border },
-  dividerTxt: { fontSize: 12, color: C.textMuted },
-  input:      { width: '100%', height: 44, borderWidth: 1, borderColor: C.border, borderRadius: R.md, paddingHorizontal: 14, fontSize: 14, color: C.text, backgroundColor: C.white, marginBottom: 12, outlineWidth: 0 } as any,
-  error:      { fontSize: 12, color: '#c62828', marginBottom: 10, alignSelf: 'flex-start' },
-  submitBtn:  { width: '100%', height: 44, borderRadius: R.pill, backgroundColor: C.buttonBlue, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  submitTxt:  { fontSize: 14, fontWeight: '600', color: '#fff' },
-  switchTxt:  { fontSize: 13, color: C.textMuted },
-  switchLink: { color: C.buttonBlue, fontWeight: '600' },
-  sentBox:    { alignItems: 'center', gap: 10 },
-  sentIcon:   { fontSize: 36 },
-  sentTitle:  { fontSize: 17, fontWeight: '600', color: C.text },
-  sentBody:   { fontSize: 13, color: C.textMuted, textAlign: 'center', lineHeight: 20 },
-  backLink:   { marginTop: 8 },
-  backLinkTxt:{ fontSize: 13, color: C.buttonBlue, fontWeight: '600' },
-});
+function makeStyles(C: ColorsType) {
+  return StyleSheet.create({
+    root:       { flex: 1, backgroundColor: C.bg },
+    scroll:     { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    card:       { width: '100%', maxWidth: 400, backgroundColor: C.card, borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 32, alignItems: 'center', ...Platform.select({ web: { boxShadow: '0 8px 32px rgba(0,0,0,0.10)' } as any }) },
+    logo:       { width: 64, height: 64, marginBottom: 8 },
+    appName:    { fontSize: 26, fontWeight: '700', color: C.text, letterSpacing: -0.5, marginBottom: 4 },
+    tagline:    { fontSize: 14, color: C.textMuted, marginBottom: 28 },
+    googleBtn:  { flexDirection: 'row', alignItems: 'center', gap: 10, width: '100%', height: 44, borderRadius: R.pill, borderWidth: 1.5, borderColor: C.border, backgroundColor: C.surface, justifyContent: 'center', marginBottom: 20 },
+    googleIcon: { fontSize: 16, fontWeight: '700', color: '#4285F4' },
+    googleTxt:  { fontSize: 14, fontWeight: '600', color: C.text },
+    dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, width: '100%', marginBottom: 20 },
+    dividerLine:{ flex: 1, height: 1, backgroundColor: C.border },
+    dividerTxt: { fontSize: 12, color: C.textMuted },
+    input:      { width: '100%', height: 44, borderWidth: 1, borderColor: C.border, borderRadius: R.md, paddingHorizontal: 14, fontSize: 14, color: C.text, backgroundColor: C.surface, marginBottom: 12, outlineWidth: 0 } as any,
+    error:      { fontSize: 12, color: '#c62828', marginBottom: 10, alignSelf: 'flex-start' },
+    submitBtn:  { width: '100%', height: 44, borderRadius: R.pill, backgroundColor: C.buttonBlue, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+    submitTxt:  { fontSize: 14, fontWeight: '600', color: '#fff' },
+    switchTxt:  { fontSize: 13, color: C.textMuted },
+    switchLink: { color: C.buttonBlue, fontWeight: '600' },
+    sentBox:    { alignItems: 'center', gap: 10 },
+    sentIcon:   { fontSize: 36 },
+    sentTitle:  { fontSize: 17, fontWeight: '600', color: C.text },
+    sentBody:   { fontSize: 13, color: C.textMuted, textAlign: 'center', lineHeight: 20 },
+    backLink:   { marginTop: 8 },
+    backLinkTxt:{ fontSize: 13, color: C.buttonBlue, fontWeight: '600' },
+  });
+}
