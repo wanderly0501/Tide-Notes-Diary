@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo, createElement
 import { Ionicons } from '@expo/vector-icons';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { R, S, ColorsType } from './theme';
 import { useTheme } from './ThemeContext';
@@ -187,6 +188,7 @@ export function EditorScreen({ docId }: Props) {
   const lineRefs  = useRef<Record<number, TextInput | null>>({});
   const webRef    = useRef<any>(null);
   const htmlRef   = useRef('');
+  const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => { docRef.current = doc; },    [doc]);
   useEffect(() => { titleRef.current = title; }, [title]);
@@ -602,6 +604,10 @@ export function EditorScreen({ docId }: Props) {
       )}
 
       {/* Body */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
       <View style={s.body}>
         {/* Web: in-flow left sidebar */}
         {isWeb && (!outlineOpen ? (
@@ -631,7 +637,12 @@ export function EditorScreen({ docId }: Props) {
         ))}
 
         {/* Editor */}
-        <ScrollView style={s.editorScroll} contentContainerStyle={s.editorContent}>
+        <ScrollView
+          ref={scrollRef}
+          style={s.editorScroll}
+          contentContainerStyle={s.editorContent}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={s.paper}>
             {isWeb ? (
               createElement('div', {
@@ -724,6 +735,7 @@ export function EditorScreen({ docId }: Props) {
           </View>
         ))}
       </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }

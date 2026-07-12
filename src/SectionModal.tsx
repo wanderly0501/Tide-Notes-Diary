@@ -113,7 +113,7 @@ export function SectionModal({ visible, initial, onClose, onSave }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} statusBarTranslucent>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={s.root}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={s.root}>
             {/* Top bar */}
             <View style={s.topBar}>
               <TouchableOpacity onPress={onClose} style={s.cancelBtn}>
