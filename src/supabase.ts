@@ -16,6 +16,30 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 const STORAGE_LIMIT_BYTES = 5 * 1024 * 1024 * 1024; // 5 GB per user
 
+export async function deleteAccountData(userId: string): Promise<void> {
+  // Delete all storage images (paginated)
+  let offset = 0;
+  while (true) {
+    const { data } = await supabase.storage
+      .from('section-images')
+      .list(userId, { limit: 100, offset });
+    if (!data?.length) break;
+    await supabase.storage
+      .from('section-images')
+      .remove(data.map(f => `${userId}/${f.name}`));
+    if (data.length < 100) break;
+    offset += 100;
+  }
+
+  // Delete all database records (section_tags cascade from sections)
+  await supabase.from('sections').delete().eq('user_id', userId);
+  await supabase.from('documents').delete().eq('user_id', userId);
+  await supabase.from('tags').delete().eq('user_id', userId);
+
+  // Delete the auth user — requires delete_my_account() SQL function in Supabase
+  await supabase.rpc('delete_my_account');
+}
+
 async function getUserStorageBytes(userId: string): Promise<number> {
   let total = 0;
   let offset = 0;

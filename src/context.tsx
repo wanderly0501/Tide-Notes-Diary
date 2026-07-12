@@ -4,7 +4,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Section, Tag, TideDocument, AppView } from './types';
 import * as DB from './db';
 import * as Web from './webDataService';
-import { supabase } from './supabase';
+import { supabase, deleteAccountData } from './supabase';
 import { C } from './theme';
 
 interface Ctx {
@@ -40,6 +40,7 @@ interface Ctx {
 
   signOut(): Promise<void>;
   reload(): Promise<void>;
+  deleteAccount(): Promise<void>;
 }
 
 const AppCtx = createContext<Ctx | null>(null);
@@ -88,7 +89,8 @@ function WebAppProvider({ children, userId }: ProviderProps) {
   const toggleTag        = (id: string) => setActiveTags(prev => toggle(prev, id));
   const deselectAllTags  = () => setActiveTags(new Set());
   const selectAllTags    = () => setActiveTags(new Set(tags.map(t => t.id)));
-  const signOut          = async () => { await supabase.auth.signOut(); };
+  const signOut         = async () => { await supabase.auth.signOut(); };
+  const deleteAccount   = async () => { await deleteAccountData(userId); await supabase.auth.signOut(); };
 
   const togglePin          = async (id: string, pinned: boolean) => { await Web.pinSection(userId, id, pinned); await loadAll(); };
   const addSection         = async (s: Section) => { await Web.insertSection(userId, s); await loadAll(); };
@@ -110,7 +112,7 @@ function WebAppProvider({ children, userId }: ProviderProps) {
       togglePin, addSection, editSection, removeSection, updateSectionTags,
       addTag, removeTag, renameTag,
       addDoc, editDoc, removeDoc, getDoc,
-      signOut, reload: loadAll,  // web: loadAll already fetches from Supabase
+      signOut, deleteAccount, reload: loadAll,  // web: loadAll already fetches from Supabase
     }}>
       {children}
     </AppCtx.Provider>
@@ -178,6 +180,11 @@ function MobileAppProvider({ children, userId }: ProviderProps) {
   const deselectAllTags = () => setActiveTags(new Set());
   const selectAllTags   = () => setActiveTags(new Set(tags.map(t => t.id)));
   const signOut         = async () => { await supabase.auth.signOut(); };
+  const deleteAccount   = async () => {
+    await DB.clearAllUserData(db, userId);
+    await deleteAccountData(userId);
+    await supabase.auth.signOut();
+  };
 
   const togglePin = async (id: string, pinned: boolean) => {
     await DB.pinSection(db, id, pinned);
@@ -245,7 +252,7 @@ function MobileAppProvider({ children, userId }: ProviderProps) {
       togglePin, addSection, editSection, removeSection, updateSectionTags,
       addTag, removeTag, renameTag,
       addDoc, editDoc, removeDoc, getDoc,
-      signOut, reload: syncAndReload,
+      signOut, deleteAccount, reload: syncAndReload,
     }}>
       {children}
     </AppCtx.Provider>

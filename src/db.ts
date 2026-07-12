@@ -307,3 +307,9 @@ export function deleteRemote(table: 'sections' | 'tags' | 'documents', id: strin
     if (error) console.warn(`delete remote ${table}`, error);
   });
 }
+
+export async function clearAllUserData(db: SQLiteDatabase, userId: string): Promise<void> {
+  await db.runAsync(`DELETE FROM sections WHERE user_id=?`, [userId]);
+  await db.runAsync(`DELETE FROM tags WHERE user_id=? AND is_predefined=0`, [userId]);
+  await db.runAsync(`DELETE FROM documents WHERE user_id=?`, [userId]);
+}

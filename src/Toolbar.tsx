@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, Image, StatusBar, Modal, Pressable, Switch, Linking } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform, Image, StatusBar, Modal, Pressable, Switch, Linking, Alert } from 'react-native';
 
 const PRIVACY_URL = Platform.OS === 'web' ? '/privacy' : 'https://tide-notes-diary.vercel.app/privacy';
 import { Ionicons } from '@expo/vector-icons';
@@ -219,7 +219,7 @@ interface Props {
 }
 
 export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags, onToggleFiles, timelineOpen, tagsOpen, filesOpen, onSignOut }: Props) {
-  const { view, setView } = useApp();
+  const { view, setView, deleteAccount } = useApp();
   const { C } = useTheme();
   const isStream = view === 'stream';
   const isDocs   = view === 'docs' || (typeof view === 'object');
@@ -238,6 +238,28 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
       setAvatarPos({ top: y + h + 6, right: window.innerWidth - x - w });
       setAccountMenuOpen(true);
     });
+  };
+
+  const confirmDeleteAccount = () => {
+    setAccountMenuOpen(false);
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account and all your data (notes, images, tags). This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete Account', style: 'destructive',
+          onPress: () => Alert.alert(
+            'Are you absolutely sure?',
+            'All your notes, images, and documents will be permanently erased.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Yes, delete everything', style: 'destructive', onPress: deleteAccount },
+            ]
+          ),
+        },
+      ]
+    );
   };
 
   if (Platform.OS !== 'web') {
@@ -327,6 +349,10 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
             <Text style={s.accountMenuTxt}>Privacy Policy</Text>
           </TouchableOpacity>
           <View style={s.accountMenuDivider} />
+          <TouchableOpacity style={s.accountMenuItem} onPress={confirmDeleteAccount}>
+            <Text style={[s.accountMenuTxt, s.accountMenuDanger]}>Delete Account</Text>
+          </TouchableOpacity>
+          <View style={s.accountMenuDivider} />
           <TouchableOpacity style={s.accountMenuItem} onPress={() => { setAccountMenuOpen(false); onSignOut?.(); }}>
             <Text style={[s.accountMenuTxt, s.accountMenuSignOut]}>Log out</Text>
           </TouchableOpacity>
@@ -344,13 +370,35 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
 interface BottomBarProps { onNew?(): void; }
 
 export function MobileBottomBar({ onNew }: BottomBarProps) {
-  const { signOut } = useApp();
+  const { signOut, deleteAccount } = useApp();
   const { C } = useTheme();
   const [menuOpen, setMenuOpen]         = useState(false);
   const [accountOpen, setAccountOpen]   = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const mb = useMemo(() => makeMobileBottomStyles(C), [C]);
+
+  const confirmDeleteAccountMobile = () => {
+    setMenuOpen(false);
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account and all your data (notes, images, tags). This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete Account', style: 'destructive',
+          onPress: () => Alert.alert(
+            'Are you absolutely sure?',
+            'All your notes, images, and documents will be permanently erased.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Yes, delete everything', style: 'destructive', onPress: deleteAccount },
+            ]
+          ),
+        },
+      ]
+    );
+  };
 
   if (Platform.OS === 'web') return null;
   return (
@@ -378,6 +426,10 @@ export function MobileBottomBar({ onNew }: BottomBarProps) {
           </TouchableOpacity>
           <TouchableOpacity style={mb.sheetItem} onPress={() => { setMenuOpen(false); Linking.openURL(PRIVACY_URL); }}>
             <Text style={mb.sheetTxt}>Privacy Policy</Text>
+          </TouchableOpacity>
+          <View style={mb.sheetDivider} />
+          <TouchableOpacity style={mb.sheetItem} onPress={confirmDeleteAccountMobile}>
+            <Text style={[mb.sheetTxt, mb.sheetDanger]}>Delete Account</Text>
           </TouchableOpacity>
           <View style={mb.sheetDivider} />
           <TouchableOpacity style={mb.sheetItem} onPress={() => { setMenuOpen(false); signOut(); }}>
@@ -449,6 +501,7 @@ function makeMobileBottomStyles(C: ColorsType) {
     sheetTxt:     { fontSize: 16, color: C.textBody },
     sheetDivider: { height: 1, backgroundColor: C.border, marginVertical: 4 },
     sheetSignOut: { color: '#c62828' },
+    sheetDanger:  { color: '#c62828', fontWeight: '600' },
     settingsHeading:  { fontSize: 17, fontWeight: '700', color: C.text, paddingHorizontal: 24, marginBottom: 16 },
     sectionLabel:     { fontSize: 10, fontWeight: '700', letterSpacing: 1, color: C.textLabel, paddingHorizontal: 24, marginBottom: 10 },
     settingsRow:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingVertical: 6 },
@@ -478,6 +531,7 @@ function makeWebStyles(C: ColorsType) {
     accountMenuItem:    { paddingHorizontal: 16, paddingVertical: 10 },
     accountMenuTxt:     { fontSize: 14, color: C.textBody },
     accountMenuSignOut: { color: '#c62828' },
+    accountMenuDanger:  { color: '#c62828', fontWeight: '600' },
     accountMenuDivider: { height: 1, backgroundColor: C.border, marginVertical: 4 },
   });
 }
