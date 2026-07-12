@@ -14,12 +14,35 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   },
 });
 
+const STORAGE_LIMIT_BYTES = 5 * 1024 * 1024 * 1024; // 5 GB per user
+
+async function getUserStorageBytes(userId: string): Promise<number> {
+  let total = 0;
+  let offset = 0;
+  const pageSize = 100;
+  while (true) {
+    const { data, error } = await supabase.storage
+      .from('section-images')
+      .list(userId, { limit: pageSize, offset });
+    if (error || !data?.length) break;
+    for (const file of data) total += (file.metadata?.size ?? 0);
+    if (data.length < pageSize) break;
+    offset += pageSize;
+  }
+  return total;
+}
+
 export async function uploadSectionImage(localUri: string, userId: string): Promise<string> {
   const ext = (localUri.split('.').pop()?.split('?')[0]?.toLowerCase()) ?? 'jpg';
   const contentType = ext === 'png' ? 'image/png' : 'image/jpeg';
   const path = `${userId}/${Date.now()}.${ext}`;
 
   const arrayBuffer = await fetch(localUri).then(r => r.arrayBuffer());
+
+  const usedBytes = await getUserStorageBytes(userId);
+  if (usedBytes + arrayBuffer.byteLength > STORAGE_LIMIT_BYTES) {
+    throw new Error('STORAGE_LIMIT_EXCEEDED');
+  }
 
   const { error } = await supabase.storage
     .from('section-images')

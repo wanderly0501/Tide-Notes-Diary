@@ -33,6 +33,7 @@ export function SectionModal({ visible, initial, onClose, onSave }: Props) {
   const [reminderDate, setReminderDate] = useState('');
   const [blocks, setBlocks]             = useState<Block[]>([{ type: 'text', content: '' }]);
   const [uploading, setUploading]       = useState(false);
+  const [uploadError, setUploadError]   = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
@@ -67,11 +68,16 @@ export function SectionModal({ visible, initial, onClose, onSave }: Props) {
     });
     if (res.canceled || !res.assets.length) return null;
     setUploading(true);
+    setUploadError(null);
     try {
       return await uploadSectionImage(res.assets[0].uri, userId);
-    } catch (e) {
-      console.warn('Image upload failed:', e);
-      return res.assets[0].uri; // fallback to local URI
+    } catch (e: any) {
+      if (e?.message === 'STORAGE_LIMIT_EXCEEDED') {
+        setUploadError('Storage limit reached (5 GB). Delete some images to free up space.');
+      } else {
+        console.warn('Image upload failed:', e);
+      }
+      return null;
     } finally {
       setUploading(false);
     }
@@ -260,6 +266,15 @@ export function SectionModal({ visible, initial, onClose, onSave }: Props) {
         <View style={s.uploadOverlay}>
           <ActivityIndicator size="large" color={C.buttonBlue} />
           <Text style={s.uploadTxt}>Uploading image…</Text>
+        </View>
+      )}
+      {uploadError && (
+        <View style={s.uploadOverlay}>
+          <Text style={{ fontSize: 28, marginBottom: 8 }}>⚠️</Text>
+          <Text style={[s.uploadTxt, { color: '#c0392b', textAlign: 'center', maxWidth: 280 }]}>{uploadError}</Text>
+          <TouchableOpacity onPress={() => setUploadError(null)} style={{ marginTop: 16, paddingHorizontal: 24, paddingVertical: 8, backgroundColor: C.buttonBlue, borderRadius: 8 }}>
+            <Text style={{ color: '#fff', fontWeight: '600', fontSize: 14 }}>OK</Text>
+          </TouchableOpacity>
         </View>
       )}
     </Modal>
