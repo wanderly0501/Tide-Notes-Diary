@@ -15,21 +15,15 @@ A cross-platform note-taking and diary app built with **Expo / React Native**, t
 <table>
   <tr>
     <td align="center"><img src="assets/1.png" alt="Sign in" width="160"/><br/><sub>Sign in</sub></td>
-    <td align="center"><img src="assets/10.png" alt="Stream view" width="160"/><br/><sub>Stream</sub></td>
     <td align="center"><img src="assets/2.png" alt="Stream — checklist & image block" width="160"/><br/><sub>Checklist & image block</sub></td>
     <td align="center"><img src="assets/3.png" alt="Stream — Timeline sidebar" width="160"/><br/><sub>Timeline sidebar</sub></td>
-  </tr>
-  <tr>
     <td align="center"><img src="assets/4.png" alt="Stream — Tags sidebar" width="160"/><br/><sub>Tags sidebar</sub></td>
-    <td align="center"><img src="assets/5.png" alt="Stream — filtered by Diary tag" width="160"/><br/><sub>Filter by tag</sub></td>
-    <td align="center"><img src="assets/9.png" alt="Stream — photo diary entries" width="160"/><br/><sub>Photo diary</sub></td>
-    <td align="center"><img src="assets/6.png" alt="Section editor" width="160"/><br/><sub>Section editor</sub></td>
   </tr>
   <tr>
+    <td align="center"><img src="assets/5.png" alt="Stream — filtered by Diary tag" width="160"/><br/><sub>Filter by tag</sub></td>
+    <td align="center"><img src="assets/6.png" alt="Section editor" width="160"/><br/><sub>Section editor</sub></td>
     <td align="center"><img src="assets/7.png" alt="Documents view" width="160"/><br/><sub>Documents</sub></td>
     <td align="center"><img src="assets/8.png" alt="Document editor" width="160"/><br/><sub>Document editor</sub></td>
-    <td></td>
-    <td></td>
   </tr>
 </table>
 
