@@ -330,6 +330,9 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
             <Ionicons name="add" size={16} color="#fff" />
           </TouchableOpacity>
         )}
+        <TouchableOpacity style={s.iconBtn} activeOpacity={0.8} onPress={() => setSettingsOpen(true)}>
+          <Ionicons name="settings-outline" size={18} color={C.textLabel} />
+        </TouchableOpacity>
         <TouchableOpacity ref={avatarRef as any} style={s.avatar} activeOpacity={0.8} onPress={openAccountMenu}>
           <Ionicons name="person-outline" size={14} color="#fff" />
         </TouchableOpacity>
@@ -341,9 +344,6 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
         <View style={[s.accountMenu, { position: 'absolute', top: avatarPos.top, right: avatarPos.right }]}>
           <TouchableOpacity style={s.accountMenuItem} onPress={() => { setAccountMenuOpen(false); setAccountInfoOpen(true); }}>
             <Text style={s.accountMenuTxt}>Account</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={s.accountMenuItem} onPress={() => { setAccountMenuOpen(false); setSettingsOpen(true); }}>
-            <Text style={s.accountMenuTxt}>Settings</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.accountMenuItem} onPress={() => { setAccountMenuOpen(false); Linking.openURL(PRIVACY_URL); }}>
             <Text style={s.accountMenuTxt}>Privacy Policy</Text>
@@ -413,6 +413,11 @@ export function MobileBottomBar({ onNew }: BottomBarProps) {
         <Ionicons name="add" size={22} color="#fff" />
       </TouchableOpacity>
 
+      {/* Right: Settings */}
+      <TouchableOpacity style={mb.sideBtn} activeOpacity={0.8} onPress={() => setSettingsOpen(true)}>
+        <Ionicons name="settings-outline" size={24} color={C.textLabel} />
+      </TouchableOpacity>
+
       {/* Account options sheet */}
       <Modal visible={menuOpen} transparent animationType="slide" onRequestClose={() => setMenuOpen(false)}>
         <Pressable style={[StyleSheet.absoluteFill, mb.overlay]} onPress={() => setMenuOpen(false)} />
@@ -420,9 +425,6 @@ export function MobileBottomBar({ onNew }: BottomBarProps) {
           <View style={mb.sheetHandle} />
           <TouchableOpacity style={mb.sheetItem} onPress={() => { setMenuOpen(false); setAccountOpen(true); }}>
             <Text style={mb.sheetTxt}>Account</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={mb.sheetItem} onPress={() => { setMenuOpen(false); setSettingsOpen(true); }}>
-            <Text style={mb.sheetTxt}>Settings</Text>
           </TouchableOpacity>
           <TouchableOpacity style={mb.sheetItem} onPress={() => { setMenuOpen(false); Linking.openURL(PRIVACY_URL); }}>
             <Text style={mb.sheetTxt}>Privacy Policy</Text>
@@ -526,6 +528,7 @@ function makeWebStyles(C: ColorsType) {
     tabTxt:       { fontSize: 13.5, fontWeight: '600', color: C.textLabel },
     tabTxtOn:     { color: '#fff' },
     newBtn:       { width: 28, height: 28, borderRadius: 14, backgroundColor: C.buttonBlue, alignItems: 'center', justifyContent: 'center', ...Platform.select({ web: { boxShadow: '0 2px 6px -1px rgba(30,60,150,0.25)' } }) },
+    iconBtn:      { width: 28, height: 28, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
     avatar:       { width: 28, height: 28, borderRadius: 14, backgroundColor: C.buttonBlue, alignItems: 'center', justifyContent: 'center', ...Platform.select({ web: { boxShadow: '0 1px 4px rgba(30,60,150,0.25)' } }) },
     accountMenu:  { minWidth: 160, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: R.md, paddingVertical: 4, ...Platform.select({ web: { boxShadow: '0 4px 16px rgba(0,0,0,0.18)' } }) },
     accountMenuItem:    { paddingHorizontal: 16, paddingVertical: 10 },
