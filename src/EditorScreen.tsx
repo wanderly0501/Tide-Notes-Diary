@@ -191,6 +191,15 @@ export function EditorScreen({ docId }: Props) {
   useEffect(() => { docRef.current = doc; },    [doc]);
   useEffect(() => { titleRef.current = title; }, [title]);
 
+  // Auto-focus the active line's TextInput after activeLine changes (mobile)
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    const line = lines[activeLine];
+    if (!line) return;
+    const t = setTimeout(() => lineRefs.current[line.id]?.focus(), 50);
+    return () => clearTimeout(t);
+  }, [activeLine]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     getDoc(docId).then(d => {
       if (d) {
@@ -296,9 +305,9 @@ export function EditorScreen({ docId }: Props) {
   // ── Mobile line handlers ────────────────────────────────────────────────────
 
   const handleTextChange = useCallback((index: number, text: string) => {
-    setLines(prev => {
-      if (text.includes('\n')) {
-        const parts = text.split('\n');
+    if (text.includes('\n')) {
+      const parts = text.split('\n');
+      setLines(prev => {
         const next = [...prev];
         next[index] = { ...next[index], text: parts[0] };
         const inserts = parts.slice(1).map(t => mkLine('body', t));
@@ -306,10 +315,12 @@ export function EditorScreen({ docId }: Props) {
         const totalWords = next.reduce((sum, l) => sum + countWords(l.text), 0);
         if (totalWords > DOC_WORD_LIMIT) return prev;
         saveLines(next);
-        const focusId = next[index + inserts.length]?.id;
-        if (focusId) setTimeout(() => lineRefs.current[focusId]?.focus(), 30);
         return next;
-      }
+      });
+      setActiveLine(index + parts.length - 1);
+      return;
+    }
+    setLines(prev => {
       const next = [...prev];
       next[index] = { ...next[index], text };
       const totalWords = next.reduce((sum, l) => sum + countWords(l.text), 0);
@@ -322,14 +333,13 @@ export function EditorScreen({ docId }: Props) {
   const handleEnter = useCallback((index: number) => {
     setLines(prev => {
       const next = [...prev];
-      // Bullet/ordered: continue same format on Enter
       const fmt = next[index]?.format;
       const ins = mkLine(fmt === 'bullet' || fmt === 'ordered' ? fmt : 'body');
       next.splice(index + 1, 0, ins);
       saveLines(next);
-      setTimeout(() => lineRefs.current[ins.id]?.focus(), 30);
       return next;
     });
+    setActiveLine(index + 1);
   }, [saveLines]);
 
   const handleBackspaceEmpty = useCallback((index: number) => {
@@ -338,10 +348,9 @@ export function EditorScreen({ docId }: Props) {
       const next = [...prev];
       next.splice(index, 1);
       saveLines(next);
-      const prevId = next[Math.max(0, index - 1)]?.id;
-      if (prevId) setTimeout(() => lineRefs.current[prevId]?.focus(), 30);
       return next;
     });
+    setActiveLine(Math.max(0, index - 1));
   }, [saveLines]);
 
   const applyFormat = useCallback((format: LineFormat) => {
@@ -351,7 +360,6 @@ export function EditorScreen({ docId }: Props) {
       if (!line) return prev;
       next[activeLine] = { ...line, format };
       saveLines(next);
-      setTimeout(() => lineRefs.current[line.id]?.focus(), 30);
       return next;
     });
   }, [activeLine, saveLines]);
@@ -644,16 +652,14 @@ export function EditorScreen({ docId }: Props) {
                   <View key={line.id} style={[s.lineRow, (isBullet || isOrdered) && s.lineRowList]}>
                     {isBullet  && <Text style={s.listPrefix}>•</Text>}
                     {isOrdered && <Text style={s.listPrefix}>{num}.</Text>}
-                    <View style={s.lineInputWrap}>
+                    {isActive ? (
                       <TextInput
                         ref={r => { lineRefs.current[line.id] = r; }}
-                        style={[s.lineBase, LINE_STYLE[line.format], !isActive && s.hiddenInput]}
+                        style={[s.lineBase, LINE_STYLE[line.format]]}
                         value={line.text}
                         onChangeText={text => handleTextChange(index, text)}
                         onFocus={() => { setActiveLine(index); setLineSelection({ start: 0, end: 0 }); }}
-                        onSelectionChange={e => {
-                          if (index === activeLine) setLineSelection(e.nativeEvent.selection);
-                        }}
+                        onSelectionChange={e => setLineSelection(e.nativeEvent.selection)}
                         onKeyPress={e => {
                           if (e.nativeEvent.key === 'Backspace' && line.text === '') handleBackspaceEmpty(index);
                         }}
@@ -670,14 +676,18 @@ export function EditorScreen({ docId }: Props) {
                         // @ts-ignore
                         outlineStyle="none"
                       />
-                      {!isActive && line.text.length > 0 && (
-                        <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
-                          <Text style={[s.lineBase, LINE_STYLE[line.format]]}>
-                            {parseInlineMarkdown(line.text)}
-                          </Text>
-                        </View>
-                      )}
-                    </View>
+                    ) : (
+                      <Text
+                        style={[s.lineBase, LINE_STYLE[line.format]]}
+                        onPress={() => setActiveLine(index)}
+                      >
+                        {line.text
+                          ? parseInlineMarkdown(line.text)
+                          : (index === 0 && lines.length === 1
+                              ? <Text style={{ color: C.textMuted }}>Start writing…</Text>
+                              : ' ')}
+                      </Text>
+                    )}
                   </View>
                 );
               })
@@ -794,8 +804,6 @@ function makeStyles(C: ColorsType) {
     lineRow:      { flexDirection: 'row', alignItems: 'flex-start', width: '100%' },
     lineRowList:  { paddingLeft: 4 },
     listPrefix:   { fontSize: 16, lineHeight: 28, color: C.textBody, marginTop: 2, marginRight: 6, width: 20, flexShrink: 0 },
-    lineInputWrap:{ flex: 1 },
-    lineBase:     { width: '100%', outlineWidth: 0, paddingVertical: 2 } as any,
-    hiddenInput:  { color: 'transparent' },
+    lineBase:     { flex: 1, outlineWidth: 0, paddingVertical: 2 } as any,
   });
 }
