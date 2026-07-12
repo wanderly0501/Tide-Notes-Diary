@@ -142,6 +142,8 @@ const FONT_SIZES = [
   { label: 'L', val: '5' }, { label: 'XL', val: '6' },
 ] as const;
 
+const DOC_WORD_LIMIT = 10_000;
+
 export function EditorScreen({ docId }: Props) {
   const { setView, getDoc, editDoc } = useApp();
   const { C } = useTheme();
@@ -254,6 +256,12 @@ export function EditorScreen({ docId }: Props) {
 
   const handleWebInput = useCallback(() => {
     const html = webRef.current?.innerHTML ?? '';
+    const stripped = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (countWords(stripped) > DOC_WORD_LIMIT) {
+      // Revert to last saved HTML
+      if (webRef.current) webRef.current.innerHTML = htmlRef.current;
+      return;
+    }
     htmlRef.current = html;
     triggerSave(html);
     parseAndSetWebHeadings(html);
@@ -274,6 +282,8 @@ export function EditorScreen({ docId }: Props) {
         next[index] = { ...next[index], text: parts[0] };
         const inserts = parts.slice(1).map(t => mkLine('body', t));
         next.splice(index + 1, 0, ...inserts);
+        const totalWords = next.reduce((sum, l) => sum + countWords(l.text), 0);
+        if (totalWords > DOC_WORD_LIMIT) return prev;
         saveLines(next);
         const focusId = next[index + inserts.length]?.id;
         if (focusId) setTimeout(() => lineRefs.current[focusId]?.focus(), 30);
@@ -281,6 +291,8 @@ export function EditorScreen({ docId }: Props) {
       }
       const next = [...prev];
       next[index] = { ...next[index], text };
+      const totalWords = next.reduce((sum, l) => sum + countWords(l.text), 0);
+      if (totalWords > DOC_WORD_LIMIT) return prev;
       saveLines(next);
       return next;
     });
@@ -374,8 +386,11 @@ export function EditorScreen({ docId }: Props) {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const meta = doc ? (() => {
     const d = new Date(doc.updatedAt);
-    return `Edited ${months[d.getMonth()]} ${d.getDate()} · ${doc.wordCount} words`;
+    return `Edited ${months[d.getMonth()]} ${d.getDate()}`;
   })() : '';
+
+  const currentWordCount = doc?.wordCount ?? 0;
+  const atDocLimit = currentWordCount >= DOC_WORD_LIMIT;
 
   const activeFormat = lines[activeLine]?.format ?? 'body';
   const isWeb = Platform.OS === 'web';
@@ -426,6 +441,9 @@ export function EditorScreen({ docId }: Props) {
           )}
         </View>
         <View style={s.subRight}>
+          <Text style={[s.wordCountTxt, atDocLimit && s.wordCountLimit]}>
+            {currentWordCount.toLocaleString()} / 10,000
+          </Text>
           <View style={s.savedBadge}>
             {saved && <Ionicons name="checkmark" size={13} color={C.success} />}
             <Text style={s.savedTxt}>{saved ? 'Saved' : 'Saving…'}</Text>
@@ -689,6 +707,8 @@ function makeStyles(C: ColorsType) {
     docMeta:      { fontSize: 12, color: C.textMuted },
     savedBadge:   { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
     savedTxt:     { fontSize: 12.5, color: C.success },
+    wordCountTxt:  { fontSize: 12, color: C.textMuted, marginRight: 10 },
+    wordCountLimit:{ color: '#c0392b', fontWeight: '600' },
     fmtBar:       {
       flexDirection: 'row', alignItems: 'center', gap: 3, flexWrap: 'wrap',
       paddingVertical: 6, paddingHorizontal: 16,
