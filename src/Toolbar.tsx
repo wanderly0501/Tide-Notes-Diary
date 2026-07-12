@@ -333,8 +333,8 @@ export function Toolbar({ onNewSection, onNewDoc, onToggleTimeline, onToggleTags
         <TouchableOpacity style={s.iconBtn} activeOpacity={0.8} onPress={() => setSettingsOpen(true)}>
           <Ionicons name="settings-outline" size={18} color={C.textLabel} />
         </TouchableOpacity>
-        <TouchableOpacity ref={avatarRef as any} style={s.avatar} activeOpacity={0.8} onPress={openAccountMenu}>
-          <Ionicons name="person-outline" size={14} color="#fff" />
+        <TouchableOpacity ref={avatarRef as any} style={s.iconBtn} activeOpacity={0.8} onPress={openAccountMenu}>
+          <Ionicons name="person-outline" size={18} color={C.textLabel} />
         </TouchableOpacity>
       </View>
 
