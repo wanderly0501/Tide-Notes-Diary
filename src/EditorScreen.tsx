@@ -40,6 +40,27 @@ interface Line { id: number; format: LineFormat; text: string }
 let _id = 0;
 const mkLine = (format: LineFormat = 'body', text = ''): Line => ({ id: ++_id, format, text });
 
+function parseInlineMarkdown(text: string): React.ReactNode[] {
+  const regex = /(\*\*[\s\S]*?\*\*|\*[\s\S]*?\*|__[\s\S]*?__|==[\s\S]*?==)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0; let key = 0; let m: RegExpExecArray | null;
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > lastIndex) parts.push(text.slice(lastIndex, m.index));
+    const raw = m[0];
+    if (raw.startsWith('**'))
+      parts.push(<Text key={key++} style={{ fontWeight: '700' }}>{raw.slice(2, -2)}</Text>);
+    else if (raw.startsWith('*'))
+      parts.push(<Text key={key++} style={{ fontStyle: 'italic' }}>{raw.slice(1, -1)}</Text>);
+    else if (raw.startsWith('__'))
+      parts.push(<Text key={key++} style={{ textDecorationLine: 'underline' }}>{raw.slice(2, -2)}</Text>);
+    else if (raw.startsWith('=='))
+      parts.push(<Text key={key++} style={{ backgroundColor: '#ffe066' }}>{raw.slice(2, -2)}</Text>);
+    lastIndex = m.index + raw.length;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts;
+}
+
 function htmlToLines(html: string): Line[] {
   if (!html) return [mkLine()];
   const processed = html
@@ -618,35 +639,45 @@ export function EditorScreen({ docId }: Props) {
                 const isBullet  = line.format === 'bullet';
                 const isOrdered = line.format === 'ordered';
                 const num = orderedNums[index];
+                const isActive = index === activeLine;
                 return (
                   <View key={line.id} style={[s.lineRow, (isBullet || isOrdered) && s.lineRowList]}>
                     {isBullet  && <Text style={s.listPrefix}>•</Text>}
                     {isOrdered && <Text style={s.listPrefix}>{num}.</Text>}
-                    <TextInput
-                      ref={r => { lineRefs.current[line.id] = r; }}
-                      style={[s.lineBase, LINE_STYLE[line.format]]}
-                      value={line.text}
-                      onChangeText={text => handleTextChange(index, text)}
-                      onFocus={() => { setActiveLine(index); setLineSelection({ start: 0, end: 0 }); }}
-                      onSelectionChange={e => {
-                        if (index === activeLine) setLineSelection(e.nativeEvent.selection);
-                      }}
-                      onKeyPress={e => {
-                        if (e.nativeEvent.key === 'Backspace' && line.text === '') handleBackspaceEmpty(index);
-                      }}
-                      // @ts-ignore web
-                      onKeyDown={Platform.OS === 'web' ? (e: any) => {
-                        if (e.key === 'Enter') { e.preventDefault(); handleEnter(index); }
-                        if (e.key === 'Backspace' && line.text === '') { e.preventDefault(); handleBackspaceEmpty(index); }
-                      } : undefined}
-                      placeholder={index === 0 && lines.length === 1 ? 'Start writing…' : ''}
-                      placeholderTextColor={C.textMuted}
-                      blurOnSubmit={false}
-                      multiline
-                      textAlignVertical="top"
-                      // @ts-ignore
-                      outlineStyle="none"
-                    />
+                    <View style={s.lineInputWrap}>
+                      <TextInput
+                        ref={r => { lineRefs.current[line.id] = r; }}
+                        style={[s.lineBase, LINE_STYLE[line.format], !isActive && s.hiddenInput]}
+                        value={line.text}
+                        onChangeText={text => handleTextChange(index, text)}
+                        onFocus={() => { setActiveLine(index); setLineSelection({ start: 0, end: 0 }); }}
+                        onSelectionChange={e => {
+                          if (index === activeLine) setLineSelection(e.nativeEvent.selection);
+                        }}
+                        onKeyPress={e => {
+                          if (e.nativeEvent.key === 'Backspace' && line.text === '') handleBackspaceEmpty(index);
+                        }}
+                        // @ts-ignore web
+                        onKeyDown={Platform.OS === 'web' ? (e: any) => {
+                          if (e.key === 'Enter') { e.preventDefault(); handleEnter(index); }
+                          if (e.key === 'Backspace' && line.text === '') { e.preventDefault(); handleBackspaceEmpty(index); }
+                        } : undefined}
+                        placeholder={index === 0 && lines.length === 1 ? 'Start writing…' : ''}
+                        placeholderTextColor={C.textMuted}
+                        blurOnSubmit={false}
+                        multiline
+                        textAlignVertical="top"
+                        // @ts-ignore
+                        outlineStyle="none"
+                      />
+                      {!isActive && line.text.length > 0 && (
+                        <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+                          <Text style={[s.lineBase, LINE_STYLE[line.format]]}>
+                            {parseInlineMarkdown(line.text)}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
                   </View>
                 );
               })
@@ -763,6 +794,8 @@ function makeStyles(C: ColorsType) {
     lineRow:      { flexDirection: 'row', alignItems: 'flex-start', width: '100%' },
     lineRowList:  { paddingLeft: 4 },
     listPrefix:   { fontSize: 16, lineHeight: 28, color: C.textBody, marginTop: 2, marginRight: 6, width: 20, flexShrink: 0 },
-    lineBase:     { flex: 1, outlineWidth: 0, paddingVertical: 2 } as any,
+    lineInputWrap:{ flex: 1 },
+    lineBase:     { width: '100%', outlineWidth: 0, paddingVertical: 2 } as any,
+    hiddenInput:  { color: 'transparent' },
   });
 }
