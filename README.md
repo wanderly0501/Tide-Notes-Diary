@@ -8,7 +8,7 @@ A cross-platform note-taking and diary app built with **Expo / React Native**, t
 
 ### Web
 
-<img src="assets/www.tide-note.com_7inch.png" alt="Web — Stream view with Timeline and Tags sidebars" width="100%" />
+<img src="assets/www.tide-note.com_7inch.png" alt="Web — Stream view with Timeline and Tags sidebars" width="80%" />
 
 ### Mobile
 
