@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { R, S, ColorsType } from './theme';
@@ -15,7 +15,13 @@ export function TimelineSidebar({ onDatePress }: Props) {
   const { C } = useTheme();
   const s = useMemo(() => makeStyles(C), [C]);
   const [open, setOpen] = useState(true);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const today = todayISO();
+
+  const handleDatePress = useCallback((date: string) => {
+    setSelectedDate(date);
+    onDatePress(date);
+  }, [onDatePress]);
 
   const months = useMemo(() => {
     const dateMap = new Map<string, number>();
@@ -70,21 +76,22 @@ export function TimelineSidebar({ onDatePress }: Props) {
               const dt = new Date(d.date + 'T12:00:00');
               const wd = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
               const isToday = d.isToday;
+              const isSelected = d.date === selectedDate;
               return (
                 <TouchableOpacity
                   key={d.date}
-                  style={[s.dayRow, isToday && s.dayRowToday]}
-                  onPress={() => onDatePress(d.date)}
+                  style={[s.dayRow, isToday && s.dayRowToday, isSelected && s.dayRowSelected]}
+                  onPress={() => handleDatePress(d.date)}
                   activeOpacity={0.7}
                 >
-                  <View style={[s.dayBar, { backgroundColor: isToday ? C.pinkBar : 'transparent' }]} />
+                  <View style={[s.dayBar, { backgroundColor: isSelected ? C.primary : isToday ? C.pinkBar : 'transparent' }]} />
                   <View>
-                    <Text style={[s.dayNum, { fontWeight: isToday ? '700' : '500', color: isToday ? C.todayText : C.textBody }]}>
+                    <Text style={[s.dayNum, { fontWeight: isToday || isSelected ? '700' : '500', color: isSelected ? C.primary : isToday ? C.todayText : C.textBody }]}>
                       {parseInt(day, 10)}
                     </Text>
-                    <Text style={s.dayWd}>{isToday ? wd + ' · Today' : wd}</Text>
+                    <Text style={[s.dayWd, isSelected && s.dayWdSelected]}>{isToday ? wd + ' · Today' : wd}</Text>
                   </View>
-                  <Text style={[s.countBadge, isToday && s.countBadgeToday]}>{d.count}</Text>
+                  <Text style={[s.countBadge, isToday && s.countBadgeToday, isSelected && s.countBadgeSelected]}>{d.count}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -116,13 +123,16 @@ function makeStyles(C: ColorsType) {
     collapseBtn: { width: 30, height: 30, borderRadius: R.md, backgroundColor: C.primaryLight, alignItems: 'center', justifyContent: 'center' },
     scroll:      { flex: 1, paddingHorizontal: 10 },
     monthLabel:  { fontSize: 11, fontWeight: '600', letterSpacing: 0.6, color: C.textMuted, paddingVertical: S.sm, paddingHorizontal: S.sm },
-    dayRow:      { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 7, paddingHorizontal: 10, borderRadius: R.md, marginBottom: 2 },
-    dayRowToday: { backgroundColor: C.today },
-    dayBar:      { width: 3, height: 26, borderRadius: 3 },
-    dayNum:      { fontSize: 13.5, lineHeight: 16 },
-    dayWd:       { fontSize: 11, color: C.textMuted },
-    countBadge:      { marginLeft: 'auto', fontSize: 14, fontWeight: '600', color: C.bullet },
-    countBadgeToday: { color: C.todayBar },
+    dayRow:          { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 7, paddingHorizontal: 10, borderRadius: R.md, marginBottom: 2 },
+    dayRowToday:     { backgroundColor: C.today },
+    dayRowSelected:  { backgroundColor: C.primaryLight },
+    dayBar:          { width: 3, height: 26, borderRadius: 3 },
+    dayNum:          { fontSize: 13.5, lineHeight: 16 },
+    dayWd:           { fontSize: 11, color: C.textMuted },
+    dayWdSelected:   { color: C.primary },
+    countBadge:          { marginLeft: 'auto', fontSize: 14, fontWeight: '600', color: C.bullet },
+    countBadgeToday:     { color: C.todayBar },
+    countBadgeSelected:  { color: C.primary },
     miniCount:       { fontSize: 11, fontWeight: '600', color: C.bullet, textAlign: 'center' },
     miniCountToday:  { color: C.todayBar },
     empty:       { fontSize: 12, color: C.textMuted, textAlign: 'center', marginTop: 24 },
